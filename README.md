@@ -1,4 +1,6 @@
-# portfolio-v1
+# Portfolio Website
+
+Built with Vue and Vuetify
 
 ## Project setup
 ```

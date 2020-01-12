@@ -95,7 +95,7 @@
 
 <script>
 export default {
-  name: 'HelloWorld',
+  name: 'MainCard',
 
   data: () => ({
     ecosystem: [

@@ -1,0 +1,20 @@
+@font-face {
+  font-family: 'Mayeka';
+  src: url('~@/assets/fonts/MayekaThinDemo.otf') format('font-opentype'),
+  url('~@/assets/fonts/MayekaThinDemo.woff') format('woff'),
+  url('~@/assets/fonts/MayekaThinDemo.ttf') format('truetype');
+}
+
+.side-bar__text {
+  color: #fff;
+  font-family: 'Mayeka', sans-serif;
+  font-size: 48px;
+  letter-spacing: .8rem;
+  transform: rotate(-90deg);
+  white-space: nowrap;
+}
+
+.side-bar__text-container {
+  height: 10vh;
+  top: 30vh;
+}

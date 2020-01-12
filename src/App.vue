@@ -1,9 +1,29 @@
 <template>
   <v-app>
+    <v-navigation-drawer
+      v-model="drawer"
+      app
+      :color="$side-bar-bg"
+      mini-variant
+      dark
+      class="elevation-24"
+    >
+      <v-list-item>
+        <v-list-item-avatar tile>
+          <img src="~@/assets/images/logo-temp.jpg">
+        </v-list-item-avatar>
+      </v-list-item>
+      <v-divider />
+      <v-list-item class="side-bar__text-container">
+        <p class="side-bar__text">
+          Jedy Chen
+        </p>
+      </v-list-item>
+    </v-navigation-drawer>
+    
     <v-app-bar
       app
       color="primary"
-      dark
     >
       <div class="d-flex align-center">
         <v-img
@@ -25,7 +45,7 @@
         />
       </div>
 
-      <v-spacer></v-spacer>
+      <v-spacer />
 
       <v-btn
         href="https://github.com/vuetifyjs/vuetify/releases/latest"
@@ -36,20 +56,28 @@
         <v-icon>mdi-open-in-new</v-icon>
       </v-btn>
     </v-app-bar>
-
+    
     <v-content>
-      <HelloWorld/>
+      <MainCard />
+      <HelloWorld />
+      <HelloWorld />
     </v-content>
   </v-app>
 </template>
 
+<style lang="scss" scoped>
+  @import "./styles/components/sidebar.scss";
+</style>
+
 <script>
+import MainCard from './components/MainCard';
 import HelloWorld from './components/HelloWorld';
 
 export default {
   name: 'App',
 
   components: {
+    MainCard,
     HelloWorld,
   },
 
@@ -58,3 +86,5 @@ export default {
   }),
 };
 </script>
+
+

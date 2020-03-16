@@ -10,7 +10,7 @@
   "dependencies": {
     "bounce.js": "^0.8.2",
     "core-js": "^3.4.4",
-    "draggabilly": "^2.2.0",
+    "interactjs": "^1.9.4",
     "mathjs": "^6.6.1",
     "node-sass": "^4.13.0",
     "vue": "^2.6.10",

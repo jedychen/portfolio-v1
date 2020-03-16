@@ -2,31 +2,27 @@
   margin-top: 30vh;
 }
 
-.main-card-container__bounce {
+.main-card-container {
+  position: relative;
 }
 
-.test {
+#info {
+  position: fixed;
+  display: inline;
 }
 
 .draggable {
+  touch-action: none;
   user-select: none;
-
-  &.is-pointer-down {
-    background: #09F;
-  }
-
-  &.is-dragging {
-    opacity: 0.7;
-  }
 }
 
-#mySVG{
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-}
+// #mySVG{
+//   position: fixed;
+//   top: 0;
+//   left: 0;
+//   width: 100%;
+//   height: 100vh;
+// }
 
 .main-card-pivot {
   width: 10px;

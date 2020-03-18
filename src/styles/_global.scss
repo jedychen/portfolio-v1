@@ -1,2 +1,4 @@
-$primary: #e00;
-$side-bar-bg: #555;
+@import 'setup/variables';
+@import 'components/maincard';
+@import 'components/sidebar';
+@import 'views/homepage';

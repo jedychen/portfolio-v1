@@ -1,9 +1,9 @@
 <template>
   <v-app>
+    <div class="canvas"></div>
     <v-navigation-drawer
-      v-model="drawer"
       app
-      :color="$side-bar-bg"
+      color=#555
       mini-variant
       dark
       class="elevation-24"
@@ -32,11 +32,15 @@
 </template>
 
 <style lang="scss" scoped>
-  @import "./styles/components/sidebar.scss";
+  .canvas {
+    height: 100%; 
+    position: fixed;
+    width: 100%;
+  }
 </style>
 
 <script>
-import HomePage from './components/HomePage';
+import HomePage from './views/HomePage';
 
 export default {
   name: 'App',
@@ -45,9 +49,14 @@ export default {
     HomePage,
   },
 
-  data: () => ({
-    //
-  }),
+  data() {
+    return {
+    }
+  },
+
+  mounted() {
+    this.$store.commit("initThread", ".canvas");
+  },
 };
 </script>
 

@@ -1,22 +1,22 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import Threads from '../assets/js/threads.js'
+import Thread from '../assets/js/thread.js'
 
 
 Vue.use(Vuex)
  
 export default new Vuex.Store({
   state: {
-    threads: new Threads(),
+    thread: new Thread(),
     cards: [],
   },
   getters: {},
   mutations: {
     initThread(state, name) {
-      state.threads.init(name);
+      state.thread.init(name);
     },
     updateThread(state, pos) {
-      state.threads.update(pos);
+      state.thread.update(pos);
     }
   },
   actions: {},

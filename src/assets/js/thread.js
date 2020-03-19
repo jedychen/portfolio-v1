@@ -1,7 +1,7 @@
 import { SVG } from '@svgdotjs/svg.js'
 
 
-class Threads {
+class Thread {
   constructor () {
     
   }
@@ -18,4 +18,4 @@ class Threads {
   }
 }
 
-export default Threads;
+export default Thread;

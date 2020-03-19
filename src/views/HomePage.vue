@@ -8,13 +8,13 @@
       justify="space-around"
       >
       <!-- About -->
-      <MainCard />
+      <CoverCard />
 
       <!-- Work -->
-      <MainCard />
+      <CoverCard />
      
       <!-- Experiment -->
-      <MainCard />
+      <CoverCard />
 
     </v-row>
   </v-container>
@@ -28,14 +28,14 @@
 </style>
 
 <script>
-import MainCard from '../components/MainCard';
+import CoverCard from '../components/CoverCard';
 import *  as homepage from '../assets/js/homepage.js'
 
 export default {
   name: 'HomePage',
 
   components: {
-    MainCard,
+    CoverCard,
   },
 
   data() {

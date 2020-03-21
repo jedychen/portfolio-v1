@@ -2,4 +2,13 @@
 @import 'views/homepage';
 @import 'components/covercard';
 @import 'components/sidebar';
-@import 'components/thread';
+
+html,
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body {
+  width:100%;
+}

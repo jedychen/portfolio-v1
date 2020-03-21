@@ -40,7 +40,7 @@
 </style>
 
 <script>
-import HomePage from './views/HomePage';
+import HomePage from '@/views/HomePage';
 
 export default {
   name: 'App',
@@ -54,9 +54,22 @@ export default {
     }
   },
 
-  mounted() {
-    this.$store.commit("initThread", ".canvas");
+  created () {
+    
   },
+
+  mounted() {
+    // Run thread.update function every 10ms
+    this.$store.commit("initThread", ".canvas");
+    setInterval(this.updateThread, 10);
+    this.$store.commit("setInteracting", true);
+  },
+
+  methods: {
+    updateThread() {
+      this.$store.commit("updateThread");
+    }
+  }
 };
 </script>
 

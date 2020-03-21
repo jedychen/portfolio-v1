@@ -17,8 +17,9 @@
       </v-img>
     </v-card>
     <div
-      ref="stitchingElement"
-      class="thread__stitching-top"
+      ref="knotElement"
+      v-bind:id="threadId"
+      class="thread__knot-top"
     ></div>
   </div>
 
@@ -42,16 +43,7 @@
   </v-card> -->
 </template>
 
-<style lang="scss" scoped>
-  .thread__stitching-top {
-    background: #999;
-    box-shadow: 0px 1px 3px #888;
-    height: 2px;
-    left: calc(50% - 5px);
-    position: absolute;
-    top: 10px;
-    width: 10px;
-  }
+<style scoped src="@/assets/css/thread.css">
 </style>
 
 <script>
@@ -61,6 +53,9 @@ import { cross } from 'mathjs'
 
 export default {
   name: 'CoverCard',
+  props: {
+    id: String
+  },
 
   data() {
     return {
@@ -73,11 +68,14 @@ export default {
       },
       threadUpdateIntervalFunc: null,
       bounceBackDuration: 1000,
+      threadId: this.id,
+      groupName: "coverCards",
     }
   },
 
   mounted() {
     const element = this.$refs.interactElement;
+    // this.updateThread();
     Interact(element).draggable({ 
       autoScroll: true,
       listeners: {
@@ -102,31 +100,39 @@ export default {
     },
   },
 
-  watch: {
-    content() {
-      this.$nextTick(()=>{
-        this.$store.commit("updateThread", this.stitchingPosition());
-      })
-    }
-  },
-
   methods: {
-    stitchingPosition() {
-      const element = this.$refs.stitchingElement;
-      const elementRect = element.getBoundingClientRect();
-      const elementCenter = {
-        x: elementRect.left,
-        y: elementRect.top,
-      };
-      return elementCenter;
-    },
+    // getKnotRect() {
+    //   const element = this.$refs.knotElement;
+    //   const elementRect = element.getBoundingClientRect();
+    //   return elementRect;
+    // },
 
     dragMoveListener (event) {
       this.isInteractClearing = false;
       let target = event.target;
       // Keep the dragged position in the data-x/data-y attributes.
-      const x = this.interactPosition.x + event.dx;
-      const y = this.interactPosition.y + event.dy;
+      const targetRect = target.getBoundingClientRect();
+      // const boundary = {
+      //   x: window.innerWidth - targetRect.left,
+      //   y: window.innerHeight - targetRect.bottom,
+      // }
+      
+      let increament = {
+        x: event.dx,
+        y: event.dy,
+      }
+
+      // if (increament.x >= boundary.x) {
+      //   increament.x = boundary.x;
+      // }
+      // if (increament.x < 0) {
+      //   increament.x = 0;
+      // }
+      // if (increament.y >= boundary.y) increament.y = boundary.y;
+
+      const x = this.interactPosition.x + increament.x;
+      const y = this.interactPosition.y + increament.y;
+
       // Add rotation based on dragging force.
       var rotationComputed = 0;
       let id = document.querySelector('.info');
@@ -134,7 +140,7 @@ export default {
       // Update the posiion attributes.
       this.interactPosition.x = x;
       this.interactPosition.y = y;
-      this.threadsUpdate();
+      // this.updateThread();
     },
 
     dragEndHandler (event) {
@@ -152,13 +158,23 @@ export default {
           duration: this.bounceBackDuration,
         })
       move.applyTo(event.target, {remove: true});
-      this.threadUpdateIntervalFunc = setInterval(this.threadsUpdate, 10);
-      setTimeout(this.clearThreadInterval, this.bounceBackDuration);
+      // this.threadUpdateIntervalFunc = setInterval(this.updateThread, 10);
+      // setTimeout(this.clearThreadInterval, this.bounceBackDuration);
     },
 
-    threadsUpdate() {
-      this.$store.commit("updateThread", this.stitchingPosition());
-    },
+    //updateThread() {
+      // const elemRect = this.getKnotRect();
+      // const payload = {
+      //   group: this.groupName,
+      //   id: this.threadId,
+      //   rect: { left: elemRect.left,
+      //           right: elemRect.right,
+      //           top: elemRect.top,
+      //           bottom: elemRect.bottom,
+      //         }
+      // }
+      // this.$store.commit("addKnot", payload);
+    //},
 
     clearThreadInterval() {
       clearInterval(this.threadUpdateIntervalFunc);

@@ -1,5 +1,7 @@
 # Portfolio Website
 
+Jedy Chen
+
 Built with Vue and Vuetify
 
 ## Project setup

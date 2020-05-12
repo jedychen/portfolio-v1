@@ -1,7 +1,7 @@
 @import 'setup/variables';
-@import 'views/homepage';
-@import 'components/covercard';
-@import 'components/sidebar';
+@import 'setup/font';
+@import 'views/featuredwork';
+// @import 'components/covercard';
 
 html,
 body {
@@ -10,5 +10,5 @@ body {
 }
 
 body {
-  width:100%;
+  width:100vw;
 }

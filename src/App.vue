@@ -1,52 +1,35 @@
 <template>
   <v-app>
-    <div class="canvas"></div>
-    <v-navigation-drawer
-      app
-      color=#555
-      mini-variant
-      dark
-      class="elevation-24"
-    >
-      <v-list-item>
-        <v-list-item-avatar>
-          <v-img
-            src="~@/assets/images/logo.jpg"
-            alt="Logo"
-          >
-          </v-img>
-        </v-list-item-avatar>
-      </v-list-item>
-      <v-divider />
-      <v-list-item class="side-bar__text-container">
-        <p class="side-bar__text">
-          Jedy Chen
-        </p>
-      </v-list-item>
-    </v-navigation-drawer>
-    
-    <v-content>
-      <HomePage />
-    </v-content>
+    <v-card class="overflow-hidden">
+      <Header  id='#scrolling-content'/>
+      <v-sheet
+        id="scrolling-content"
+        class="overflow-y-auto"
+        max-height="100vh"
+      >
+        <FeaturedWork />
+        <!-- <v-container style="height: 1000px;"></v-container> -->
+      </v-sheet>
+    </v-card>
   </v-app>
 </template>
 
 <style lang="scss" scoped>
-  .canvas {
-    height: 100%; 
-    position: fixed;
-    width: 100%;
-  }
+body {
+  background-color: black;
+}
 </style>
 
 <script>
-import HomePage from '@/views/HomePage';
+import Header from '@/components/Header';
+import FeaturedWork from '@/views/FeaturedWork';
 
 export default {
   name: 'App',
 
   components: {
-    HomePage,
+    Header,
+    FeaturedWork,
   },
 
   data() {
@@ -60,15 +43,15 @@ export default {
 
   mounted() {
     // Run thread.update function every 10ms
-    this.$store.commit("initThread", ".canvas");
-    setInterval(this.updateThread, 10);
-    this.$store.commit("setInteracting", true);
+    // this.$store.commit("initThread", ".canvas");
+    // setInterval(this.updateThread, 10);
+    // this.$store.commit("setInteracting", true);
   },
 
   methods: {
-    updateThread() {
-      this.$store.commit("updateThread");
-    }
+    // updateThread() {
+    //   this.$store.commit("updateThread");
+    // }
   }
 };
 </script>

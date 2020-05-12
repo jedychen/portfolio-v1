@@ -1,0 +1,198 @@
+{
+  "projects": [
+    {
+        "position": 0,
+        "url": "/equilibrium",
+        "imageUrl": "equilibrium.jpg",
+        "themeColor": "#8b8f9a",
+        "blocks": [
+            {
+                "horizontalFlip": true,
+                "text": "EQUILIBRIUM",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": true,
+                "text": "Game",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": false,
+                "text": "2014",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": true,
+                "text": "Arduino",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": false,
+                "text": "Processing",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": true,
+                "text": "Sensor",
+                "weight": "normal"
+            }
+        ]
+    },
+    {
+        "position": 1,
+        "url": "/vision-poster",
+        "imageUrl": "vision-poster.jpg",
+        "themeColor": "#ba3a72",
+        "titleIndex": 2,
+        "blocks": [
+            {
+                "horizontalFlip": false,
+                "text": "Touch,Designer",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": true,
+                "text": "Generative,Design",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": true,
+                "text": "VISION,POSTER",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": false,
+                "text": "Data,Visualization",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": true,
+                "text": "2019",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": false,
+                "text": "Art",
+                "weight": "normal"
+            }
+        ]
+    },
+    {
+        "position": 2,
+        "url": "/academy",
+        "imageUrl": "academy.jpg",
+        "themeColor": "#c7c7c7",
+        "titleIndex": 1,
+        "blocks": [
+            {
+                "horizontalFlip": false,
+                "text": "IBM,Waston",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": true,
+                "text": "R/GA,ACADEMY",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": true,
+                "text": "2017",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": false,
+                "text": "Visualize,Personality",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": true,
+                "text": "Data,Expression",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": false,
+                "text": "AI,Analysor",
+                "weight": "normal"
+            }
+        ]
+    },
+    {
+        "position": 3,
+        "url": "/hu",
+        "imageUrl": "hu.jpg",
+        "themeColor": "#ee6f40",
+        "titleIndex": 2,
+        "blocks": [
+            {
+                "horizontalFlip": false,
+                "text": "Installation",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": true,
+                "text": "P5.js",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": true,
+                "text": "HU:,THE,SPECTRUM,OF BEING",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": false,
+                "text": "Generative,Design",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": true,
+                "text": "2016",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": false,
+                "text": "Photography",
+                "weight": "normal"
+            }
+        ]
+    },
+    {
+        "position": 4,
+        "url": "/sketch",
+        "imageUrl": "sketch.jpg",
+        "themeColor": "#9b9046",
+        "titleIndex": 2,
+        "blocks": [
+            {
+                "horizontalFlip": false,
+                "text": "2014",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": true,
+                "text": "DIGITAL,SKETCH",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": true,
+                "text": "Procreate",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": false,
+                "text": "Painting",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": true,
+                "text": "Sherlock,Homes",
+                "weight": "normal"
+            },
+            {
+                "horizontalFlip": false,
+                "text": "TV,Show",
+                "weight": "normal"
+            }
+        ]
+    }
+  ]
+}

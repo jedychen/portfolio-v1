@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import Thread from '../assets/js/thread.js'
+import FlipCard from '../assets/js/flipcard.js'
 
 
 Vue.use(Vuex)
@@ -8,8 +8,8 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    thread: new Thread(),
-    isInteracting: false, // Boolean, keep updating thread if true
+    flipCard: new FlipCard(),
+    //isInteracting: false, // Boolean, keep updating thread if true
   },
   getters: {
     getKnotTransform(state) {
@@ -20,15 +20,16 @@ export default new Vuex.Store({
     },
   },
   mutations: {
-    initThread(state, name) {
-      state.thread.init(name);
+    initFlipCard(state, container) {
+      state.flipCard.init(container);
+      state.flipCard.animate();
     },
-    updateThread(state) {
-      if(state.isInteracting) state.thread.update();
-    },
-    setInteracting(state, status) {
-      state.isInteracting = status;
-    },
+    // updateThread(state) {
+    //   if(state.isInteracting) state.thread.update();
+    // },
+    // setInteracting(state, status) {
+    //   state.isInteracting = status;
+    // },
     // addKnot(state, payload) {
     //   const group = payload.group; // Int number
     //   const id = payload.id; // String name

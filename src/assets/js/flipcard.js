@@ -62,6 +62,7 @@ class FlipCard {
     this.CAMERA_Y = 0
     this.CAMERA_BOTTOM_MARGIN = 2 * this.CARD_SIZE
     this.SWIPE_SPEED = 400
+    this.LOADING_PROGRESS = 0
   }
 
   init(container) {
@@ -135,13 +136,18 @@ class FlipCard {
     this.renderer.render(this.scene, this.camera)
   }
 
+  getLoadingProgress() {
+    return this.LOADING_PROGRESS
+  }
+
   /* - Load cover images for projects - */
   // It will set up all the threejs scene after loading the images.
   // Can extend to a loading bar with the link below.
   // https://threejsfundamentals.org/threejs/lessons/threejs-textures.html#easy
   loadCoverImages_() {
-    let loadManager = new THREE.LoadingManager();
+    let loadManager = new THREE.LoadingManager()
     let imageLoader = new THREE.TextureLoader(loadManager)
+    this.LOADING_PROGRESS = 0
     this.coverImages = []
 
     const imageOffsets = [
@@ -164,13 +170,17 @@ class FlipCard {
     }
      
     loadManager.onLoad = () => {
-        this.setupResponsive(false)
-        this.setupLights(this.group)
-        this.group.position.y = this.PROJ_COL_NUM * this.CARD_COL_NUM * this.CARD_SIZE * 0.5 / this.aspectRatio - 135
-        this.scene.add(this.group)
-        this.setupRenderer(this.container)
-        console.log("Loading assets done.")
+      this.setupResponsive(false)
+      this.setupLights(this.group)
+      this.group.position.y = this.PROJ_COL_NUM * this.CARD_COL_NUM * this.CARD_SIZE * 0.5 / this.aspectRatio - 135
+      this.scene.add(this.group)
+      this.setupRenderer(this.container)
+      console.log("Loading assets done.")
     }
+
+    loadManager.onProgress = (urlOfLastItemLoaded, itemsLoaded, itemsTotal) => {
+      this.LOADING_PROGRESS = itemsLoaded / itemsTotal
+    };
   }
 
   // **********************************************************************
@@ -229,7 +239,7 @@ class FlipCard {
   }
 
   /* -- Set up ThreeJS lights -- */
-  //  parent: object3D Object group.
+  // parent: object3D Object group.
   setupLights(parent) {
     let key_light, ambient_light
     key_light = new THREE.DirectionalLight(this.LIGHT_COLOR, 1.2)
@@ -240,7 +250,7 @@ class FlipCard {
   }
 
   /* -- Set up ThreeJS render -- */
-  //  parent: object3D Object group.
+  // parent: object3D Object group.
   setupRenderer(parent) {
     this.renderer.setPixelRatio(window.devicePixelRatio)
     this.renderer.setClearColor(this.BACKGROUND_COLOR, 1.0)
@@ -248,20 +258,21 @@ class FlipCard {
   }
 
   /* -- Set up project cards --*/
-  //  parent: object3D Object group.
-  //  projectConfig: json Project configuration file. 
+  // Use the project theme color for text background and card's side background.
+  // parent: object3D Object group.
+  // projectConfig: json Project configuration file. 
   setupProjectCards(parent, projectsConfig) {
     var geometry = new THREE.BoxBufferGeometry(this.CARD_SIZE, this.CARD_SIZE, 0.03)
-    const blankMaterial = new THREE.MeshBasicMaterial({color: 0xFFFFFF})
     for (var i=0; i < this.PROJ_NUM; i++) {
+      let blankMaterial = new THREE.MeshBasicMaterial({color: projectsConfig.projects[i].themeColor})
       this.setupCardsSingleProject_(parent, projectsConfig.projects[i], blankMaterial, geometry)
     }
   }
 
   /* -- Set up cards for a single project --*/
-  //  parent: object3D Object group.
-  //  projectConfig: json Single project's configuration file.
-  //  geometry: mesh BoxBufferGeometry.
+  // parent: object3D Object group.
+  // projectConfig: json Single project's configuration file.
+  // geometry: mesh BoxBufferGeometry.
   setupCardsSingleProject_(parent, projectConfig, material, geometry) {
     const projectIndex = projectConfig.position
     const projectOrigin = this.calcuProjOriginPos_(projectIndex)

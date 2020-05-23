@@ -1,7 +1,7 @@
 <template>
   <v-app-bar
     absolute
-    color="#555"
+    color="grey darken-3"
     dark
     hide-on-scroll
     short

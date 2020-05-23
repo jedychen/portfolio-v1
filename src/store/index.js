@@ -12,17 +12,19 @@ export default new Vuex.Store({
     //isInteracting: false, // Boolean, keep updating thread if true
   },
   getters: {
-    getKnotTransform(state) {
-      // return state.thread.getKnotTransform();
+    getLoadingProgress(state) {
+      return state.flipCard.getLoadingProgress() * 100
     },
-    getStitchTransform(state) {
+    getClickedProject(state) {
       // return state.thread.getStitchTransform();
+    },
+    getTransitionProgress(state) {
     },
   },
   mutations: {
     initFlipCard(state, container) {
-      state.flipCard.init(container);
-      state.flipCard.animate();
+      state.flipCard.init(container)
+      state.flipCard.animate()
     },
     // updateThread(state) {
     //   if(state.isInteracting) state.thread.update();

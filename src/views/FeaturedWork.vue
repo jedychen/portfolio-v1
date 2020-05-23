@@ -1,12 +1,77 @@
 <template>
-  <div id="container"></div>
+  <div 
+    :class="theme_class">
+    <div id="threejs-container"></div>
+    <v-container class="loading__container">
+      <v-row
+        class="fill-height"
+        align-content="center"
+        justify="center"
+      >
+        <v-col
+            class="subtitle-1 text-center loading__text"
+            cols="12"
+          >
+          Loading assets...
+        </v-col>
+        <v-col cols="3">
+          <v-progress-linear
+            v-bind:value="loadingProgress"
+            background-color="grey darken-3"
+            color="grey lighten-5"
+            >
+          </v-progress-linear>
+        </v-col>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
 <style lang="scss" scoped>
-#container {
+.feature-work__container {
   width: 100vw;
   height: 100vh;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &.loading--completed {
+    .loading__container {
+      visibility: hidden;
+      
+      .loading__text {
+        opacity: 0;
+      }
+    }
+
+    #threejs-container {
+      opacity: 1;
+    }
+  }
 }
+
+#threejs-container {
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  transition: all 1s ease;
+  transition-delay: 0.5s;
+}
+
+.loading__container {
+  position: fixed;
+
+  .loading__text {
+    opacity: 1;
+    color: white;
+    transition: all 0.5s ease;
+  }
+}
+
+
 </style>
 
 <script>
@@ -15,17 +80,13 @@ export default {
 
   data() {
     return {
-      camera: null,
-      scene: null,
-      renderer: null,
-      mesh: null,
-      flipCard: null,
+      theme_class: "feature-work__container",
     }
   },
 
   mounted() {
-    this.detectWebGL();
-    this.$store.commit("initFlipCard", document.getElementById('container'));
+    this.detectWebGL()
+    this.$store.commit("initFlipCard", document.querySelector('#threejs-container'))
   },
 
   methods: {
@@ -36,6 +97,22 @@ export default {
       if (!Detector.webgl) Detector.addGetWebGLMessage()
     }
   },
-  
+
+  computed: {
+    loadingProgress() {
+      return this.$store.getters.getLoadingProgress
+    }
+  },
+
+  watch: {
+    loadingProgress(value) {
+      if (value >= 99.9) {
+        this.theme_class = "feature-work__container loading--completed"
+      } else {
+        this.theme_class = "feature-work__container"
+      }
+    }
+  }
+
 };
 </script>

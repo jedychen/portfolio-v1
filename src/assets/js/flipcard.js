@@ -4,40 +4,40 @@ import { gsap, Elastic, Power4 } from "gsap"
 import json from '../project_data.json'
 import {mobileCheck, tabletCheck, randomInRange, calcDistance} from './utils.js'
 
-// Thread Data Structure
+// Data Structure
 
-// knots: Array, Each group is a key
-//        Stores all the knot objects' information.
-// - groupId: Object, group info
-//   items: Array
-//       id: String, name
-//       posL: Object {x: Int, y: Int}
-//       posR: Object {x: Int, y: Int}
-// - ...
-
-// knotLines: Object, Each group is a key
-//            Lines connecting knot objects.
-// - group-name-1: Object, group info
-//     items: Array
-//       id: String, id of object at the line end
-//       line: SVG.line
-// - ...
+// "projects": Array, Configuration for projects
+//    "position": number, Position in layout.
+//    "url": string, Jump link.
+//    "imageUrl": string, Image src link.
+//    "themeColor": string, Color for card.
+//    "blocks": Array, Cards info.
+//       "horizontalFlip": boolean, If card is flipping horizontally.
+//       "text": string, Text displayed at the back of card. Separated with ','.
+//       "weight": string. Font weight like "normal", "border".
 
 
 /* - Window Configurations - */
 //@private
 const BREAKPOINTS_ = {
-    xs: 600,
-    sm: 960,
-    md: 1264,
-    lg: 1904,
+  xs: 600,
+  sm: 960,
+  md: 1264,
+  lg: 1904,
 }
 
 //@private
 const CAMERA_DISTANCE_ = {
-    single: 360,
-    double: 720,
-    triple: 1090,
+  single: 360, // one cards in a row.
+  double: 720, // two cards in a row.
+  triple: 1090, // three cards in a row.
+}
+
+//@private
+const CONFIGURATION_ = {
+  fontSize: 22, // Text at the back of cards.
+  lineHeight: 40, // Text at the back of cards.
+  swipeSpeed: 400, // Speed of vertically swipping screen on mobile.
 }
 
 class FlipCard {
@@ -47,22 +47,22 @@ class FlipCard {
 
   constructor() {
     //screen ratio
-    this.AUTO_FLIP = false
+    this.IS_RENDERING = true // If the threeJS is rendering.
+    this.AUTO_FLIP = false // If flip cards automatically.
     this.PIXEL_RATIO = 1
     this.INTERSECTED = null
     this.CARD_SIZE = 100 // Card's width, height
     this.CARD_CREATED = false
     this.CARD_COL_NUM = 3
     this.CARD_ROW_NUM = 2
-    this.OFFSET_TOP = 20 // Move the group upwards
     // Standard size for setting up positions of light and other major elements. 
     this.LIGHT_COLOR = 0xFFFFFF
     this.WALL_SIZE = (9 * this.CARD_SIZE) 
     this.BACKGROUND_COLOR = 0x000000
     this.CAMERA_Y = 0
     this.CAMERA_BOTTOM_MARGIN = 2 * this.CARD_SIZE
-    this.SWIPE_SPEED = 400
     this.LOADING_PROGRESS = 0
+    this.URL = ''
   }
 
   init(container) {
@@ -102,6 +102,7 @@ class FlipCard {
   }
 
   animate() {
+    if (!this.IS_RENDERING) return
     requestAnimationFrame(this.animate.bind(this))
     this.render()
   }
@@ -138,6 +139,14 @@ class FlipCard {
 
   getLoadingProgress() {
     return this.LOADING_PROGRESS
+  }
+
+  getURL() {
+    return this.URL
+  }
+
+  setRendering(toRender) {
+    this.IS_RENDERING = toRender
   }
 
   /* - Load cover images for projects - */
@@ -305,6 +314,7 @@ class FlipCard {
       card.projectIndex = projectIndex
       card.rotateDir = (Math.random() < 0.5 ? -Math.PI : Math.PI)
       card.rotateAxis = horizontalFlip ? 'y' : 'x'
+      card.url = projectConfig.url
 
       this.setProjectCard_(card, projectOrigin, projectIndex, i)
 
@@ -367,7 +377,7 @@ class FlipCard {
     canvas.height = canvasSize
 
     var context = canvas.getContext("2d");
-    context.font = fontWeight + " 26pt Helvetica"
+    context.font = fontWeight + " " + CONFIGURATION_.fontSize.toString() + "pt Helvetica"
     context.textAlign = "left"
     context.fillStyle = color
 
@@ -385,7 +395,7 @@ class FlipCard {
     context.fillStyle = "black";
     for (var i=0; i<textArray.length; i++) {
       context.fillText(textArray[i], x, y)
-      y += 50
+      y += CONFIGURATION_.lineHeight
     }
 
     var texture = new THREE.Texture( canvas )
@@ -504,14 +514,14 @@ class FlipCard {
   }
 
   swipDeviceUp() {
-    let changedPosY = this.camera.position.y - this.SWIPE_SPEED
+    let changedPosY = this.camera.position.y - CONFIGURATION_.swipeSpeed
     if (changedPosY <= -this.CAMERA_Y + this.CAMERA_BOTTOM_MARGIN)
       changedPosY = -this.CAMERA_Y + this.CAMERA_BOTTOM_MARGIN
     this.hammerSwipe = gsap.to(this.camera.position, {duration: 0.5, ease: "power1.out", y: changedPosY});
   }
 
   swipDeviceDown() {
-    let changedPosY = this.camera.position.y + this.SWIPE_SPEED
+    let changedPosY = this.camera.position.y + CONFIGURATION_.swipeSpeed
     if (changedPosY >= this.CAMERA_Y)
       changedPosY = this.CAMERA_Y
     this.hammerSwipe = gsap.to(this.camera.position, {duration: 0.5, ease: "power1.out", y: changedPosY});
@@ -535,7 +545,9 @@ class FlipCard {
     var intersects = this.raycaster.intersectObjects(this.group.children);
     if ( intersects.length > 0 && intersects[ 0 ].object.name == 'card' ) {
       this.addCardTransition_(intersects[ 0 ].object)
+      this.URL = intersects.url
     }
+    setTimeout(()=>this.setRendering(false), 3000)
   }
 }
 

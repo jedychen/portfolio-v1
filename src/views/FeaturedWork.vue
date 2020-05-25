@@ -1,6 +1,5 @@
 <template>
-  <div 
-    :class="theme_class">
+  <div class="feature-work__container">
     <div id="threejs-container"></div>
     <v-container class="loading__container">
       <v-row
@@ -29,14 +28,16 @@
 
 <style lang="scss" scoped>
 .feature-work__container {
-  width: 100vw;
-  height: 100vh;
+  align-items: center;
   background-color: black;
   display: flex;
+  height: 100vh;
   justify-content: center;
-  align-items: center;
+  opacity: 1;
+  visibility: visible;
+  width: 100vw;
 
-  &.loading--completed {
+  &.loading-completed {
     .loading__container {
       visibility: hidden;
       
@@ -49,29 +50,34 @@
       opacity: 1;
     }
   }
+
+  &.project-clicked {
+    opacity: 0;
+    visibility: hidden;
+    transition: all 1s ease;
+    transition-delay: 2s;
+  }
 }
 
 #threejs-container {
-  opacity: 0;
-  width: 100%;
   height: 100%;
+  opacity: 0;
   padding: 0;
   margin: 0;
   transition: all 1s ease;
   transition-delay: 0.5s;
+  width: 100%;
 }
 
 .loading__container {
   position: fixed;
 
   .loading__text {
-    opacity: 1;
     color: white;
+    opacity: 1;
     transition: all 0.5s ease;
   }
 }
-
-
 </style>
 
 <script>
@@ -81,10 +87,12 @@ export default {
   data() {
     return {
       theme_class: "feature-work__container",
+      container: null,
     }
   },
 
   mounted() {
+    this.container = document.querySelector(".feature-work__container")
     this.detectWebGL()
     this.$store.commit("initFlipCard", document.querySelector('#threejs-container'))
   },
@@ -101,15 +109,24 @@ export default {
   computed: {
     loadingProgress() {
       return this.$store.getters.getLoadingProgress
+    },
+    clickedProject() {
+      return this.$store.getters.getClickedProject
     }
   },
 
   watch: {
     loadingProgress(value) {
       if (value >= 99.9) {
-        this.theme_class = "feature-work__container loading--completed"
-      } else {
-        this.theme_class = "feature-work__container"
+        this.container.classList.add("loading-completed")
+      }
+    },
+    clickedProject(value) {
+      if (value != '') {
+        this.container.classList.add("project-clicked")
+        // setTimeout(()=>{
+        //   this.container.style.display = "none"
+        // }, 3000)
       }
     }
   }

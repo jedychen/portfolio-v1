@@ -16,9 +16,7 @@ export default new Vuex.Store({
       return state.flipCard.getLoadingProgress() * 100
     },
     getClickedProject(state) {
-      // return state.thread.getStitchTransform();
-    },
-    getTransitionProgress(state) {
+      return state.flipCard.getURL()
     },
   },
   mutations: {
@@ -26,12 +24,12 @@ export default new Vuex.Store({
       state.flipCard.init(container)
       state.flipCard.animate()
     },
-    // updateThread(state) {
-    //   if(state.isInteracting) state.thread.update();
-    // },
-    // setInteracting(state, status) {
-    //   state.isInteracting = status;
-    // },
+    resetFlipCard(state) {
+      state.flipCard.setRendering(true)
+    },
+    setRendering(state, rendering) {
+      state.flipCard.setRendering(rendering)
+    },
     // addKnot(state, payload) {
     //   const group = payload.group; // Int number
     //   const id = payload.id; // String name

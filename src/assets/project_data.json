@@ -2,7 +2,7 @@
   "projects": [
     {
         "position": 0,
-        "url": "/equilibrium",
+        "url": "#equilibrium",
         "imageUrl": "equilibrium.jpg",
         "themeColor": "#8b8f9a",
         "blocks": [
@@ -40,7 +40,7 @@
     },
     {
         "position": 1,
-        "url": "/vision-poster",
+        "url": "#vision-poster",
         "imageUrl": "vision-poster.jpg",
         "themeColor": "#ba3a72",
         "titleIndex": 2,

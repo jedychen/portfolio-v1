@@ -53,7 +53,7 @@
 
 <script>
 export default {
-  name: 'CoverCard',
+  name: 'TheHeader',
   props: {
     id: String
   },

@@ -1,14 +1,13 @@
 <template>
   <v-app>
     <v-card class="overflow-hidden">
-      <Header  id='#scrolling-content'/>
+      <TheHeader id='#scrolling-content'/>
       <v-sheet
         id="scrolling-content"
-        class="overflow-y-auto"
+        class="overflow-y-auto main-sheet"
         max-height="100vh"
       >
-        <FeaturedWork />
-        <!-- <v-container style="height: 1000px;"></v-container> -->
+        <router-view :key="$route.path" />
       </v-sheet>
     </v-card>
   </v-app>
@@ -18,18 +17,20 @@
 body {
   background-color: black;
 }
+
+.main-sheet {
+  background-color: black;
+}
 </style>
 
 <script>
-import Header from '@/components/Header';
-import FeaturedWork from '@/views/FeaturedWork';
+import TheHeader from '@/components/TheHeader';
 
 export default {
   name: 'App',
 
   components: {
-    Header,
-    FeaturedWork,
+    TheHeader,
   },
 
   data() {

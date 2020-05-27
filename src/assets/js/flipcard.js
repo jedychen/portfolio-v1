@@ -1,28 +1,13 @@
 import * as THREE from "three";
 import * as Hammer from "hammerjs";
-import { gsap, Elastic, Power4 } from "gsap";
+import gsap from "gsap";
+import FlipCardRender from "./flipCardRender.js";
 import json from "../project_data.json";
-import {
-  mobileCheck,
-  tabletCheck,
-  randomInRange,
-  calcDistance,
-} from "./utils.js";
+import { mobileCheck, tabletCheck } from "./utils.js";
 
-// Data Structure
-
-// "projects": Array, Configuration for projects
-//    "position": number, Position in layout.
-//    "url": string, Jump link.
-//    "imageUrl": string, Image src link.
-//    "themeColor": string, Color for card.
-//    "blocks": Array, Cards info.
-//       "horizontalFlip": boolean, If card is flipping horizontally.
-//       "text": string, Text displayed at the back of card. Separated with ','.
-//       "weight": string. Font weight like "normal", "border".
-
-/* - Window Configurations - */
-//@private
+/* Window breakpoint configuration.
+ * @private
+ */
 const BREAKPOINTS_ = {
   xs: 600,
   sm: 960,
@@ -30,180 +15,211 @@ const BREAKPOINTS_ = {
   lg: 1904,
 };
 
-//@private
+/* Camera's z distance.
+ * @private
+ */
 const CAMERA_DISTANCE_ = {
   single: 360, // one cards in a row.
   double: 720, // two cards in a row.
   triple: 1090, // three cards in a row.
 };
 
-//@private
+/* General configurations.
+ * @private
+ */
 const CONFIGURATION_ = {
-  fontSize: 22, // Text at the back of cards.
-  lineHeight: 40, // Text at the back of cards.
   swipeSpeed: 400, // Speed of vertically swipping screen on mobile.
 };
 
+/* Device code name.
+ * @private
+ */
 const DEVICE_ = {
   MOBILE: 0,
   TABLET: 1,
   DESKTOP: 2,
 };
 
+// FlipCard Class for used in main.js.
 class FlipCard {
-  // **********************************************************************
-  // DECLARATIONS
-  // ----------------------------------------------------------------------
-
   constructor() {
-    //screen ratio
-    this.IS_RENDERING = true; // If the threeJS is rendering.
-    this.INTERSECTED = null;
-    this.VISITED = false;
-    this.CARD_SIZE = 100; // Card's width, height
-    this.CARD_CREATED = false;
-    this.CARD_COL_NUM = 3;
-    this.CARD_ROW_NUM = 2;
+    this.flipCardRender = new FlipCardRender();
+
+    const cardSize = this.flipCardRender.getCardSize();
     // Standard size for setting up positions of light and other major elements.
+    this.WALL_SIZE = 9 * cardSize; // Bounding wall's size.
+    this.CAMERA_BOTTOM_MARGIN = 2 * cardSize;
+    this.PROJECT_WIDTH = this.flipCardRender.getProjectWidth();
+    this.PROJECT_HEIGHT = this.flipCardRender.getProjectHeight();
     this.LIGHT_COLOR = 0xffffff;
-    this.WALL_SIZE = 9 * this.CARD_SIZE;
     this.BACKGROUND_COLOR = 0x000000;
-    this.CAMERA_Y = 0;
-    this.CAMERA_BOTTOM_MARGIN = 2 * this.CARD_SIZE;
-    this.LOADING_PROGRESS = 0;
-    this.URL = "";
+    this.DEVICE_ = DEVICE_.DESKTOP;
+
+    this.isInitialized_ = false;
+    this.cameraY_ = 0;
+    this.cameraZ_ = 0;
+    this.intersectedObject_ = null; // Intersected object with raycaster.
+    this.projectClicked_ = false;
+    this.loadingProgress_ = 0;
+    this.url_ = "";
+    this.isRendering_ = true; // If the threeJS is rendering.
+    this.container_ = null;
+    this.aspectRatio_ = 1;
+    this.autoFlip_ = false; // Automatically flip the cards.
+    this.devicePixelRatio_ = 1;
+    this.projectsConfig_ = {};
+    this.projectNum_ = 0;
+    this.projectColNum_ = 3;
+    this.cardImages_ = []; // Images for each card.
   }
 
+  // Main public functions
+
+  /* Initialize the class when vue view is entered.
+   * @param {Element} container Html element of the container.
+   * @public
+   */
   init(container) {
-    this.container = container;
-    this.aspectRatio = this.container.clientWidth / this.container.clientHeight;
-    if (this.CARD_CREATED) {
-      this.setupResponsive(true);
-      this.setupRenderer(this.container);
+    this.container_ = container;
+
+    // When creating a new vue view (happens when switching tabs).
+    if (this.isInitialized_) {
+      this.setupResponsive_(false);
+      // Append the render to the new container.
+      this.setupRenderer_(this.container_);
       this.addEventListeners_();
       return;
     }
 
-    this.setupDeviceConfig_();
+    // Functions below only need to be excuted once.
 
-    this.cards = [];
+    this.configDevice_();
 
-    /* - ThreeJS Rendering Scene Variables - */
-    this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
-    });
-    this.camera = new THREE.PerspectiveCamera(45, this.aspectRatio, 0.1, 2000);
-    this.scene = new THREE.Scene();
-    this.group = new THREE.Object3D();
-    /* - Ray Caster Configurations - */
-    this.mouse = new THREE.Vector2(
-      this.container.clientWidth,
-      this.container.clientHeight
+    // Initialize Three.js configurations.
+    this.renderer_ = new THREE.WebGLRenderer({ antialias: true });
+    this.camera_ = new THREE.PerspectiveCamera(
+      45,
+      this.container_.clientWidth / this.container_.clientHeight,
+      0.1,
+      2000
     );
-    this.raycaster = new THREE.Raycaster();
+    this.scene_ = new THREE.Scene();
+    this.group_ = new THREE.Object3D();
 
-    this.projectsConfig = json;
-    this.PROJ_NUM = this.projectsConfig.projects.length;
-    this.projectsHeight = 0;
-    this.projectsWidth = 0;
+    // Ray caster configurations.
+    this.mouse_ = new THREE.Vector2(
+      this.container_.clientWidth,
+      this.container_.clientHeight
+    );
+    this.raycaster_ = new THREE.Raycaster();
+
+    this.projectsConfig_ = json; // Load the Json file from local storage.
+    this.projectNum_ = this.projectsConfig_.projects.length;
 
     this.loadCoverImages_();
     this.addEventListeners_();
   }
 
+  /* Main function for update.
+   * @public
+   */
   animate() {
-    if (!this.IS_RENDERING) return;
+    if (!this.isRendering_) return;
     requestAnimationFrame(this.animate.bind(this));
-    this.render();
+    this.render_();
   }
 
-  /* - Main Rendering Function - */
-  render() {
-    if (this.AUTO_FLIP === true) {
-      this.renderer.render(this.scene, this.camera);
-      return;
-    }
-    // update the picking ray with the camera and mouse position
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-    // calculate objects intersecting the picking ray
-    let intersects = this.raycaster.intersectObjects(this.group.children);
-    if (intersects.length > 0) {
-      if (this.INTERSECTED != intersects[0].object) {
-        this.INTERSECTED = intersects[0].object;
-        if (this.INTERSECTED.name == "card") {
-          this.INTERSECTED.flip.restart();
-          document.documentElement.style.cursor = "pointer";
-        }
-      } else if (this.INTERSECTED && this.INTERSECTED.name == "card") {
-        document.documentElement.style.cursor = "pointer";
-        if (this.INTERSECTED.flip.progress() >= 0.5) {
-          this.INTERSECTED.flip.progress(0.5);
-        }
-      }
-    } else {
-      document.documentElement.style.cursor = "default";
-    }
-    this.renderer.render(this.scene, this.camera);
-  }
+  // Public functions
 
+  /* Get current progess of loading assets/images.
+   * @public
+   */
   getLoadingProgress() {
-    return this.LOADING_PROGRESS;
+    return this.loadingProgress_;
   }
 
-  getURL() {
-    return this.URL;
+  /* Get current url of the project card visited.
+   * @public
+   */
+  getUrl() {
+    return this.url_;
   }
 
-  setRendering(toRender) {
-    this.IS_RENDERING = toRender;
+  /* Set if the canvas is rendering.
+   * @param {boolean} render True if rendering the canvas.
+   * @public
+   */
+  setRendering(render) {
+    this.isRendering_ = render;
   }
 
+  /* Call when need to transition away to another vue view.
+   * @public
+   */
   transitionAway() {
-    this.IS_RENDERING = false;
+    this.isRendering_ = false;
     this.removeEventListeners_();
   }
 
+  /* Call when need to transition back to this canvas view.
+   * @public
+   */
   transitionBack() {
-    this.IS_RENDERING = true;
-    if (this.VISITED) setTimeout(this.addCardTransitionBack_.bind(this), 2000);
-  }
-
-  addEventListeners_() {
-    console.log("added listensers");
-    if (this.DEVICE == DEVICE_.DESKTOP) {
-      this.container.addEventListener("wheel", this.updateCamera.bind(this), false);
-    } else {
-      this.addHammerListener_();
+    this.isRendering_ = true;
+    if (this.projectClicked_) {
+      setTimeout(this.flipCardRender.transitionBack, 2000);
+      this.projectClicked_ = false;
     }
-    this.container.addEventListener("mousemove", this.onMouseMove.bind(this), false);
-    window.addEventListener("resize", this.setupResponsive.bind(this), false);
-    this.container.addEventListener("click", this.onMouseClick.bind(this), false);
   }
 
-  removeEventListeners_() {
-    if (this.DEVICE == DEVICE_.DESKTOP) {
-      this.container.removeEventListener("wheel", this.updateCamera.bind(this), false);
-    } else {
-      this.removeHammerListener_();
+  // Main functions
+
+  /* Main function for rendering and ray castering.
+   * @private
+   */
+  render_() {
+    if (this.autoFlip_) {
+      this.renderer_.render(this.scene_, this.camera_);
+      return;
     }
-    this.container.removeEventListener(
-      "mousemove",
-      this.onMouseMove.bind(this),
-      false
-    );
-    window.removeEventListener("resize", this.setupResponsive.bind(this), false);
-    this.container.removeEventListener("click", this.onMouseClick.bind(this), false);
+
+    // Update the picking ray with the camera and mouse position.
+    this.raycaster_.setFromCamera(this.mouse_, this.camera_);
+
+    // Calculate objects intersecting the picking ray.
+    const intersects = this.raycaster_.intersectObjects(this.group_.children);
+
+    if (intersects.length > 0) {
+      // When the mouse is moving on a new card.
+      if (this.intersectedObject_ != intersects[0].object) {
+        this.intersectedObject_ = intersects[0].object;
+        if (this.flipCardRender.isCard(this.intersectedObject_)) {
+          document.documentElement.style.cursor = "pointer";
+          this.flipCardRender.flip(this.intersectedObject_);
+        }
+      } else if (
+        // When the mouse is focusing on one single card.
+        this.intersectedObject_ &&
+        this.flipCardRender.isCard(this.intersectedObject_)
+      ) {
+        document.documentElement.style.cursor = "pointer";
+        this.flipCardRender.holdFlip(this.intersectedObject_);
+      }
+    } else {
+      // When no intersected detected.
+      document.documentElement.style.cursor = "default";
+    }
+
+    this.renderer_.render(this.scene_, this.camera_);
   }
 
-  /* - Load cover images for projects - */
-  // It will set up all the threejs scene after loading the images.
-  // Can extend to a loading bar with the link below.
-  // https://threejsfundamentals.org/threejs/lessons/threejs-textures.html#easy
+  /* Load cover images for projects.
+   * It will set up all the threejs scene after loading the images.
+   * @private
+   */
   loadCoverImages_() {
     let loadManager = new THREE.LoadingManager();
     let imageLoader = new THREE.TextureLoader(loadManager);
-    this.LOADING_PROGRESS = 0;
-    this.coverImages = [];
 
     const imageOffsets = [
       { x: 0, y: 0.5 },
@@ -214,481 +230,332 @@ class FlipCard {
       { x: 0.666, y: 0 },
     ];
 
-    for (let i = 0; i < this.PROJ_NUM; i++) {
+    for (let i = 0; i < this.projectNum_; i++) {
+      // 6 cards per project.
       for (let j = 0; j < 6; j++) {
-        let coverImage = imageLoader.load(
-          require("@/assets/images/" + this.projectsConfig.projects[i].imageUrl)
+        let cardImage = imageLoader.load(
+          require("@/assets/images/" +
+            this.projectsConfig_.projects[i].imageUrl)
         );
-        coverImage.repeat.set(0.333, 0.5);
-        coverImage.offset.set(imageOffsets[j].x, imageOffsets[j].y);
-        this.coverImages.push(coverImage);
+        cardImage.repeat.set(0.333, 0.5);
+        cardImage.offset.set(imageOffsets[j].x, imageOffsets[j].y);
+        this.cardImages_.push(cardImage);
       }
     }
 
     loadManager.onLoad = () => {
-      this.setupResponsive(false);
-      this.setupLights(this.group);
-      this.group.position.y =
-        (this.PROJ_COL_NUM * this.CARD_COL_NUM * this.CARD_SIZE * 0.5) /
-          this.aspectRatio -
+      this.setupResponsive_(true);
+      this.setupLights_(this.group_);
+      this.group_.position.y =
+        (this.projectColNum_ * this.PROJECT_WIDTH * 0.5) / this.aspectRatio_ -
         135;
-      this.scene.add(this.group);
-      this.setupRenderer(this.container);
-      console.log("Loading assets done.");
+      this.scene_.add(this.group_);
+      this.setupRenderer_(this.container_);
+      console.log("Assets are all loaded.");
+      this.isInitialized_ = true;
     };
 
     loadManager.onProgress = (urlOfLastItemLoaded, itemsLoaded, itemsTotal) => {
-      this.LOADING_PROGRESS = itemsLoaded / itemsTotal;
+      this.loadingProgress_ = itemsLoaded / itemsTotal;
     };
   }
 
-  // **********************************************************************
   // SETUP
-  // ----------------------------------------------------------------------
-  /* -- Set up device and corresponding animation -- */
-  setupDeviceConfig_() {
+
+  /* Detect device and set up device specific configurations.
+   * @private
+   */
+  configDevice_() {
     // Check based on device info
     if (mobileCheck() === true) {
-      if (tabletCheck()) this.DEVICE = DEVICE_.TABLET;
-      else this.DEVICE = DEVICE_.MOBILE;
+      this.autoFlip_ = true;
+      if (tabletCheck()) {
+        this.DEVICE_ = DEVICE_.TABLET;
+        this.devicePixelRatio_ = 1;
+        console.log("Tablet device");
+      } else {
+        this.DEVICE_ = DEVICE_.MOBILE;
+        this.devicePixelRatio_ = window.devicePixelRatio;
+        console.log("Mobile device");
+      }
     } else {
-      this.DEVICE = DEVICE_.DESKTOP;
+      // Desktop
+      this.autoFlip_ = false;
+      this.devicePixelRatio_ = 1;
+      this.DEVICE_ = DEVICE_.TABLET;
+      console.log("Desktop device");
     }
 
-    switch (true) {
-      case this.DEVICE == DEVICE_.MOBILE:
-        this.AUTO_FLIP = true;
-        this.PIXEL_RATIO = window.devicePixelRatio;
-        console.log("Mobile device");
-        break;
-      case this.DEVICE == DEVICE_.TABLET:
-        this.AUTO_FLIP = true;
-        this.PIXEL_RATIO = 1;
-        console.log("Tablet device");
-        break;
-      default:
-        this.AUTO_FLIP = false;
-        this.PIXEL_RATIO = 1;
-        console.log("Mobile device");
-        break;
+    this.flipCardRender.setAutoFlip(this.autoFlip_);
+  }
+
+  /* Set up responsive behavior.
+   * @param {boolean} resize If only resizing happening.
+   * @private
+   */
+  setupResponsive_(isInitializing = true) {
+    this.configureResponsive_();
+
+    // Set up render.
+    this.renderer_.setSize(
+      this.container_.clientWidth,
+      this.container_.clientHeight
+    );
+
+    // Set up the camera. Move the camera to the top of project cards.
+    const projectsHeight =
+      Math.ceil(this.projectNum_ / this.projectColNum_) * this.PROJECT_HEIGHT;
+    const projectsWidth = this.projectColNum_ * this.PROJECT_WIDTH;
+
+    this.cameraY_ = projectsHeight * 0.5;
+    this.camera_.aspect = this.aspectRatio_;
+    this.camera_.position.set(0, this.cameraY_, this.cameraZ_);
+    this.camera_.updateProjectionMatrix();
+
+    this.flipCardRender.setProjectsSize(projectsWidth, projectsHeight);
+    this.flipCardRender.setProjectsColNum(this.projectColNum_);
+    // Set up the flip cards layout.
+    if (this.flipCardRender.isInitialized() == false) {
+      this.flipCardRender.initializeProjects(
+        this.projectsConfig_,
+        this.cardImages_
+      );
+      for (const card of this.flipCardRender.getAllCards()) {
+        this.group_.add(card);
+      }
+    } else {
+      this.flipCardRender.resetProjects();
     }
   }
-  /* -- Set up responsive behavior -- */
-  setupResponsive(resize = true) {
-    this.renderer.setSize(
-      this.container.clientWidth,
-      this.container.clientHeight
-    );
-    this.aspectRatio = this.container.clientWidth / this.container.clientHeight;
-    let _width = this.container.clientWidth;
 
-    // Check based on screen size
+  /* Calculate configurations for responsive behavior.
+   * @private
+   */
+  configureResponsive_() {
+    this.aspectRatio_ =
+      this.container_.clientWidth / this.container_.clientHeight;
+    const clientWidth = this.container_.clientWidth;
+
+    // Calculate based on screen size.
     switch (true) {
-      case _width < BREAKPOINTS_.xs * this.PIXEL_RATIO:
-        this.PROJ_COL_NUM = 1;
-        this.CAMERA_Z = CAMERA_DISTANCE_.single / this.aspectRatio;
+      case clientWidth < BREAKPOINTS_.xs * this.devicePixelRatio_:
+        this.projectColNum_ = 1;
+        this.cameraZ_ = CAMERA_DISTANCE_.single / this.aspectRatio_;
         console.log("Screen size: xs");
         break;
-      case _width < BREAKPOINTS_.sm * this.PIXEL_RATIO:
-        this.PROJ_COL_NUM = 2;
-        this.CAMERA_Z = CAMERA_DISTANCE_.double / this.aspectRatio;
+      case clientWidth < BREAKPOINTS_.sm * this.devicePixelRatio_:
+        this.projectColNum_ = 2;
+        this.cameraZ_ = CAMERA_DISTANCE_.double / this.aspectRatio_;
         console.log("Screen size: sm");
         break;
-      case _width < BREAKPOINTS_.md * this.PIXEL_RATIO:
-        this.PROJ_COL_NUM = 2;
-        this.CAMERA_Z = CAMERA_DISTANCE_.double / this.aspectRatio;
+      case clientWidth < BREAKPOINTS_.md * this.devicePixelRatio_:
+        this.projectColNum_ = 2;
+        this.cameraZ_ = CAMERA_DISTANCE_.double / this.aspectRatio_;
         console.log("Screen size: md");
         break;
       default:
-        this.PROJ_COL_NUM = 3;
-        this.CAMERA_Z = CAMERA_DISTANCE_.triple / this.aspectRatio;
+        this.projectColNum_ = 3;
+        this.cameraZ_ = CAMERA_DISTANCE_.triple / this.aspectRatio_;
         console.log("Screen size: default");
         break;
     }
-
-    this.projectsHeight =
-      Math.ceil(this.PROJ_NUM / this.PROJ_COL_NUM) *
-      this.CARD_ROW_NUM *
-      this.CARD_SIZE;
-    this.projectsWidth = this.PROJ_COL_NUM * this.CARD_COL_NUM * this.CARD_SIZE;
-
-    this.CAMERA_Y = this.projectsHeight * 0.5;
-
-    console.log(this.CAMERA_Y);
-    // Move the camera to the top of project cards
-    this.setupCamera(0, this.CAMERA_Y, this.CAMERA_Z);
-    this.camera.aspect = this.aspectRatio;
-    this.camera.updateProjectionMatrix();
-
-    if (!this.CARD_CREATED) {
-      this.setupProjectCards(this.group, this.projectsConfig);
-      this.CARD_CREATED = true;
-    } else {
-      this.resetProjectCards(resize);
-    }
   }
 
-  setupCamera(x, y, z) {
-    this.camera.position.set(x, y, z);
-  }
-
-  /* -- Set up ThreeJS lights -- */
-  // parent: object3D Object group.
-  setupLights(parent) {
-    let key_light, ambient_light;
-    key_light = new THREE.DirectionalLight(this.LIGHT_COLOR, 1.2);
-    ambient_light = new THREE.AmbientLight(this.LIGHT_COLOR, 0.8);
+  /* Set up Three.js lights.
+   * @param {THREE.Object3D} parent Group for adding elements.
+   * @private
+   */
+  setupLights_(parent) {
+    let key_light = new THREE.DirectionalLight(this.LIGHT_COLOR, 1.2);
+    let ambient_light = new THREE.AmbientLight(this.LIGHT_COLOR, 0.8);
     key_light.position.set(-this.WALL_SIZE, this.WALL_SIZE, this.WALL_SIZE);
     ambient_light.position.set(this.WALL_SIZE, this.WALL_SIZE, this.WALL_SIZE);
     parent.add(key_light).add(ambient_light);
   }
 
-  /* -- Set up ThreeJS render -- */
-  // parent: object3D Object group.
-  setupRenderer(parent) {
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setClearColor(this.BACKGROUND_COLOR, 1.0);
-    parent.appendChild(this.renderer.domElement);
+  /* Set up render and append it to container.
+   * @param {Element} container Html element of container.
+   * @private
+   */
+  setupRenderer_(container) {
+    this.renderer_.setPixelRatio(window.devicePixelRatio);
+    this.renderer_.setClearColor(this.BACKGROUND_COLOR, 1.0);
+    container.appendChild(this.renderer_.domElement);
   }
 
-  /* -- Set up project cards --*/
-  // Use the project theme color for text background and card's side background.
-  // parent: object3D Object group.
-  // projectConfig: json Project configuration file.
-  setupProjectCards(parent, projectsConfig) {
-    var geometry = new THREE.BoxBufferGeometry(
-      this.CARD_SIZE,
-      this.CARD_SIZE,
-      0.03
-    );
-    for (var i = 0; i < this.PROJ_NUM; i++) {
-      let blankMaterial = new THREE.MeshBasicMaterial({
-        color: projectsConfig.projects[i].themeColor,
-      });
-      this.setupCardsSingleProject_(
-        parent,
-        projectsConfig.projects[i],
-        blankMaterial,
-        geometry
-      );
-    }
-  }
-
-  /* -- Set up cards for a single project --*/
-  // parent: object3D Object group.
-  // projectConfig: json Single project's configuration file.
-  // geometry: mesh BoxBufferGeometry.
-  setupCardsSingleProject_(parent, projectConfig, material, geometry) {
-    const projectIndex = projectConfig.position;
-    const projectOrigin = this.calcuProjOriginPos_(projectIndex);
-
-    for (let i = 0; i < 6; i++) {
-      let horizontalFlip = Math.random() >= 0.5;
-      let index = i + projectIndex * 6;
-      let cardMaterial = [
-        material, //left
-        material, //right
-        material, // top
-        material, // bottom
-        new THREE.MeshBasicMaterial({
-          // front
-          map: this.coverImages[index],
-          transparent: true,
-        }),
-        new THREE.MeshStandardMaterial({
-          // back
-          map: this.drawTextAsTexture_(
-            projectConfig.blocks[i].text.split(","),
-            projectConfig.themeColor,
-            projectConfig.blocks[i].weight,
-            horizontalFlip
-          ),
-        }),
-      ];
-
-      let card = new THREE.Mesh(geometry, cardMaterial);
-      card.name = "card";
-      card.index = i; // index between 0 to 6
-      card.projectIndex = projectIndex;
-      card.rotateDir = Math.random() < 0.5 ? -Math.PI : Math.PI;
-      card.rotateAxis = horizontalFlip ? "y" : "x";
-      card.url = projectConfig.url;
-
-      this.setProjectCard_(card, projectOrigin, projectIndex, i);
-
-      this.cards.push(card);
-      parent.add(card);
-    }
-  }
-
-  resetProjectCards(resize = false) {
-    for (var i = 0; i < this.cards.length; i++) {
-      var card = this.cards[i];
-      var projectIndex = card.projectIndex;
-      var projectOrigin = this.calcuProjOriginPos_(projectIndex);
-
-      this.setProjectCard_(
-        card,
-        projectOrigin,
-        projectIndex,
-        card.index,
-        resize
-      );
-    }
-  }
-
-  setProjectCard_(card, projectOrigin, projectIndex, cardIndex, resize) {
-    var x = projectOrigin.x + (cardIndex % this.CARD_COL_NUM) * this.CARD_SIZE;
-    var y =
-      projectOrigin.y -
-      Math.floor(cardIndex / this.CARD_COL_NUM) * this.CARD_SIZE;
-    card.position.set(x, y, 0);
-    // Gives each card a relative position of index (x, y) within the canvas,
-    // card at the top left corner is (0, 0), the card on the right is (1, 0)
-    var projOriginPos = {
-      x: (projectIndex % this.PROJ_COL_NUM) * this.CARD_COL_NUM,
-      y: Math.floor(projectIndex / this.PROJ_COL_NUM) * this.CARD_ROW_NUM,
-    };
-    card.coordinatePos = {
-      x: projOriginPos.x + (cardIndex % this.CARD_COL_NUM),
-      y: projOriginPos.y + Math.floor(cardIndex / this.CARD_COL_NUM),
-    };
-    if (!resize) this.addCardFlipAnimation_(card, resize);
-  }
-
-  calcuProjOriginPos_(projectIndex) {
-    var projectWidth = this.CARD_COL_NUM * this.CARD_SIZE;
-    var projectHeight = this.CARD_ROW_NUM * this.CARD_SIZE;
-
-    var xOrigin =
-      -this.projectsWidth * 0.5 +
-      (projectIndex % this.PROJ_COL_NUM) * projectWidth;
-    var yOrigin =
-      this.projectsHeight * 0.5 -
-      Math.floor(projectIndex / this.PROJ_COL_NUM) * projectHeight;
-
-    return {
-      x: xOrigin + this.CARD_SIZE * 0.5,
-      y: yOrigin + this.CARD_SIZE * 0.5,
-    };
-  }
-
-  /* -- Draws text on a canvas --*/
-  // To be used as texture on cards.
-  //  textArray: string Separated with ','.
-  //  color: hex number.
-  //  fontWeight: string 'normal'/'bold'/'lighter'
-  //  horizontalFlip: boolean If the card is flipping horizontally.
-  drawTextAsTexture_(textArray, color, fontWeight, horizontalFlip) {
-    var canvas = document.createElement("canvas");
-    const canvasSize = 256;
-    canvas.width = canvasSize;
-    canvas.height = canvasSize;
-
-    var context = canvas.getContext("2d");
-    context.font =
-      fontWeight + " " + CONFIGURATION_.fontSize.toString() + "pt Helvetica";
-    context.textAlign = "left";
-    context.fillStyle = color;
-
-    // Rotates canvas if the card is not flipping horizontally.
-    var flip = 1;
-    if (!horizontalFlip) {
-      context.rotate(Math.PI);
-      flip = -1;
-    }
-    // Draw canvas background
-    context.fillRect(0, 0, flip * canvas.width, flip * canvas.height);
-    // Draw texts
-    var x = (flip * canvas.width) / 2 - 110;
-    var y = (flip * canvas.height) / 2 - 70;
-    context.fillStyle = "black";
-    for (var i = 0; i < textArray.length; i++) {
-      context.fillText(textArray[i], x, y);
-      y += CONFIGURATION_.lineHeight;
-    }
-
-    var texture = new THREE.Texture(canvas);
-    texture.needsUpdate = true;
-
-    return texture;
-  }
-
-  /* -- Adds flipping animation as GSAP timeline --*/
-  //  card: object3D Project card
-  addCardFlipAnimation_(card) {
-    const duration = 2; // 2 seconds
-    var delay = 0;
-    var pause = true;
-    var repeat = 0;
-    if (this.AUTO_FLIP) {
-      delay = randomInRange(0, 40);
-      pause = false;
-      repeat = -1;
-    }
-    var config_flip = {
-      ease: Elastic.easeOut,
-      duration: duration,
-      delay: delay,
-    };
-    var config_reverse = {
-      ease: Elastic.easeOut,
-      duration: duration,
-    };
-
-    config_flip[card.rotateAxis] = card.rotateDir;
-    config_reverse[card.rotateAxis] = 0;
-
-    card.flip = gsap
-      .timeline({
-        paused: pause,
-        repeat: repeat,
-      })
-      .to(card.rotation, config_flip)
-      .to(card.rotation, config_reverse);
-  }
-
-  /* -- Adds fade away transition to all the cards --*/
-  //  cardVisited: object3D Project card, currently clicked card.
-  addCardTransitionAway_(cardVisited) {
-    for (let i = 0; i < this.cards.length; i++) {
-      let card = this.cards[i];
-      let config_ripple = {
-        ease: Elastic.easeOut,
-        duration: 2,
-        z: 100,
-      };
-      config_ripple["delay"] =
-        0.2 * calcDistance(card.coordinatePos, cardVisited.coordinatePos);
-      let config_flip = {
-        ease: Power4.easeOut,
-        duration: 0.5,
-      };
-      config_flip[card.rotateAxis] = 0;
-      let config_fade = {
-        ease: Power4.easeOut,
-        duration: 1,
-        opacity: 0,
-      };
-      config_fade["delay"] =
-        config_ripple["delay"] + config_ripple["duration"] - 1.2;
-
-      // Moves the cards up on z axis.
-      gsap.to(card.position, config_ripple);
-      // Removes the flip animation completely
-      card.flip.clear();
-      // Flips back the cards that are turned around.
-      gsap.to(card.rotation, config_flip);
-      // Fading animation to the front side of the cards
-      gsap.to(card.material[4], config_fade);
-    }
-  }
-
-  addCardTransitionBack_() {
-    let cardVisited = this.INTERSECTED;
-    for (let i = 0; i < this.cards.length; i++) {
-      let card = this.cards[i];
-      let config_fade = {
-        ease: Power4.easeOut,
-        duration: 1,
-        opacity: 1,
-      };
-      config_fade["delay"] =
-        0.2 * calcDistance(card.coordinatePos, cardVisited.coordinatePos);
-      let config_ripple = {
-        ease: Elastic.easeOut,
-        duration: 2,
-        z: 0,
-      };
-      config_ripple["delay"] = 
-          config_fade["delay"] + config_fade["duration"] - 1.2;
-
-      // Fading animation to the front side of the cards
-      gsap.to(card.material[4], config_fade);
-      // Moves the cards up on z axis.
-      gsap.to(card.position, config_ripple);
-      this.addCardFlipAnimation_(card);
-    }
-  }
-
-  // **********************************************************************
   // LISTENER
-  // ----------------------------------------------------------------------
-  /* - Camera scrolling - */
-  /* - Camera scrolling - */
-  updateCamera(event) {
-    let currentPosY = this.camera.position.y;
-    //if (Math.abs(currentPosY) < Math.abs(this.CAMERA_Y))
-    let changedPosY = this.camera.position.y - event.deltaY;
-    if (changedPosY >= this.CAMERA_Y) this.camera.position.y = this.CAMERA_Y;
-    else if (changedPosY <= -this.CAMERA_Y + this.CAMERA_BOTTOM_MARGIN)
-      this.camera.position.y = -this.CAMERA_Y + this.CAMERA_BOTTOM_MARGIN;
-    else this.camera.position.y = changedPosY;
+
+  /* Main function for adding all the listeners.
+   * @private
+   */
+  addEventListeners_() {
+    if (this.isDesktop_()) {
+      this.container_.addEventListener(
+        "wheel",
+        this.scrollDevice_.bind(this),
+        false
+      );
+    } else {
+      this.addHammerListener_();
+    }
+
+    this.container_.addEventListener(
+      "mousemove",
+      this.onMouseMove_.bind(this),
+      false
+    );
+    this.container_.addEventListener(
+      "click",
+      this.onMouseClick_.bind(this),
+      false
+    );
+    window.addEventListener("resize", this.setupResponsive_.bind(this), false);
   }
 
-  /* - Hammer Event, for mobile devices only. - */
+  /* Main function for removing all the listeners.
+   * @private
+   */
+  removeEventListeners_() {
+    if (this.isDesktop_()) {
+      this.container_.removeEventListener(
+        "wheel",
+        this.scrollDevice_.bind(this),
+        false
+      );
+    } else {
+      this.removeHammerListener_();
+    }
+
+    this.container_.removeEventListener(
+      "mousemove",
+      this.onMouseMove_.bind(this),
+      false
+    );
+    this.container_.removeEventListener(
+      "click",
+      this.onMouseClick_.bind(this),
+      false
+    );
+    window.removeEventListener(
+      "resize",
+      this.setupResponsive_.bind(this),
+      false
+    );
+  }
+
+  /* Add listener (Hammer.js) for interactions on mobile/tablet.
+   * @private
+   */
   addHammerListener_() {
     this.hammerSwipe = null;
-    this.hammertime = new Hammer(this.container, {
+    this.hammertime = new Hammer(this.container_, {
       inputClass: Hammer.TouchInput,
     });
     this.hammertime.get("swipe").set({ direction: Hammer.DIRECTION_VERTICAL });
-    this.hammertime.on("swipeup", this.swipDeviceUp.bind(this));
-    this.hammertime.on("swipedown", this.swipDeviceDown.bind(this));
+    this.hammertime.on("swipeup", this.swipDeviceUp_.bind(this));
+    this.hammertime.on("swipedown", this.swipDeviceDown_.bind(this));
   }
 
+  /* Remove listener (Hammer.js) for interactions on mobile/tablet.
+   * @private
+   */
   removeHammerListener_() {
-    this.hammertime.off("swipeup", this.swipDeviceUp.bind(this));
-    this.hammertime.off("swipedown", this.swipDeviceDown.bind(this));
+    this.hammertime.off("swipeup", this.swipDeviceUp_.bind(this));
+    this.hammertime.off("swipedown", this.swipDeviceDown_.bind(this));
   }
 
-  swipDeviceUp() {
+  /* Handler for scrolling device on desktop.
+   * @param {Event} event JS event.
+   * @private
+   */
+  scrollDevice_(event) {
+    let currentPosY = this.camera_.position.y;
+    let changedPosY = this.camera_.position.y - event.deltaY;
+    if (changedPosY >= this.cameraY_) this.camera_.position.y = this.cameraY_;
+    else if (changedPosY <= -this.cameraY_ + this.CAMERA_BOTTOM_MARGIN)
+      this.camera_.position.y = -this.cameraY_ + this.CAMERA_BOTTOM_MARGIN;
+    else this.camera_.position.y = changedPosY;
+  }
+
+  /* Handler for swipping device up on mobile.
+   * @private
+   */
+  swipDeviceUp_() {
     console.log("listen event swipe up");
-    let changedPosY = this.camera.position.y - CONFIGURATION_.swipeSpeed;
-    if (changedPosY <= -this.CAMERA_Y + this.CAMERA_BOTTOM_MARGIN)
-      changedPosY = -this.CAMERA_Y + this.CAMERA_BOTTOM_MARGIN;
-    this.hammerSwipe = gsap.to(this.camera.position, {
+    let changedPosY = this.camera_.position.y - CONFIGURATION_.swipeSpeed;
+    if (changedPosY <= -this.cameraY_ + this.CAMERA_BOTTOM_MARGIN)
+      changedPosY = -this.cameraY_ + this.CAMERA_BOTTOM_MARGIN;
+    this.hammerSwipe = gsap.to(this.camera_.position, {
       duration: 0.5,
       ease: "power1.out",
       y: changedPosY,
     });
   }
 
-  swipDeviceDown() {
+  /* Handler for swipping device down on mobile.
+   * @private
+   */
+  swipDeviceDown_() {
     console.log("listen event swipe down");
-    let changedPosY = this.camera.position.y + CONFIGURATION_.swipeSpeed;
-    if (changedPosY >= this.CAMERA_Y) changedPosY = this.CAMERA_Y;
-    this.hammerSwipe = gsap.to(this.camera.position, {
+    let changedPosY = this.camera_.position.y + CONFIGURATION_.swipeSpeed;
+    if (changedPosY >= this.cameraY_) changedPosY = this.cameraY_;
+    this.hammerSwipe = gsap.to(this.camera_.position, {
       duration: 0.5,
       ease: "power1.out",
       y: changedPosY,
     });
   }
 
-  /* - Raycaster mouse update - */
-  onMouseMove(event) {
+  /* Handler for raycaster's mouse update.
+   * @param {Event} event JS event.
+   * @private
+   */
+  onMouseMove_(event) {
     console.log("listening to mouse move");
     // calculate mouse position in normalized device coordinates
     // (-1 to +1) for both components
     event.preventDefault();
-    this.mouse.x = (event.offsetX / this.container.clientWidth) * 2 - 1;
-    this.mouse.y = -(event.offsetY / this.container.clientHeight) * 2 + 1;
+    this.mouse_.x = (event.offsetX / this.container_.clientWidth) * 2 - 1;
+    this.mouse_.y = -(event.offsetY / this.container_.clientHeight) * 2 + 1;
   }
 
-  /* - Camera scrolling - */
-  onMouseClick(event) {
+  /* Handler for clicking card.
+   * @param {Event} event JS event.
+   * @private
+   */
+  onMouseClick_(event) {
     event.preventDefault();
     // update the picking ray with the camera and mouse position
-    this.raycaster.setFromCamera(this.mouse, this.camera);
+    this.raycaster_.setFromCamera(this.mouse_, this.camera_);
     // calculate objects intersecting the picking ray
-    var intersects = this.raycaster.intersectObjects(this.group.children);
-    if (intersects.length > 0 && intersects[0].object.name == "card") {
-      this.INTERSECTED = intersects[0].object;
-      this.addCardTransitionAway_(this.INTERSECTED);
-      this.URL = this.INTERSECTED.url;
+    var intersects = this.raycaster_.intersectObjects(this.group_.children);
+    if (
+      intersects.length > 0 &&
+      this.flipCardRender.isCard(intersects[0].object)
+    ) {
+      this.intersectedObject_ = intersects[0].object;
+      this.flipCardRender.transitionAway(this.intersectedObject_);
+      this.url_ = this.flipCardRender.getUrl(this.intersectedObject_);
       setTimeout(() => this.setRendering(false), 3000);
-      this.VISITED = true;
+      this.projectClicked_ = true;
     }
+  }
+
+  // Utilities
+
+  // @private
+  isMobile_() {
+    return this.DEVICE_ == DEVICE_.MOBILE;
+  }
+
+  // @private
+  isTablet_() {
+    return this.DEVICE_ == DEVICE_.TABLET;
+  }
+
+  // @private
+  isDesktop_() {
+    return this.DEVICE_ == DEVICE_.DESKTOP;
   }
 }
 

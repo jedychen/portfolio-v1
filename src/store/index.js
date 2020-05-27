@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import FlipCard from "../assets/js/flipcard.js";
+import FlipCard from "../assets/js/flipCard.js";
 
 Vue.use(Vuex);
 
@@ -15,7 +15,7 @@ const store = new Vuex.Store({
       return state.flipCard.getLoadingProgress() * 100;
     },
     getClickedProject(state) {
-      return state.flipCard.getURL();
+      return state.flipCard.getUrl();
     },
   },
   mutations: {

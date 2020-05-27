@@ -26,14 +26,14 @@
 
     <v-toolbar-items>
       <v-btn icon>
-        <span>Work</span>
+        <router-link to="/">Work</router-link>
       </v-btn>
       <v-divider
         class="mx-4"
         vertical
       ></v-divider>
       <v-btn icon>
-        <span>About</span>
+        <router-link to="/about">About</router-link>
       </v-btn>
     </v-toolbar-items>
 

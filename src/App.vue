@@ -1,24 +1,18 @@
 <template>
   <v-app>
-    <v-card class="overflow-hidden">
-      <TheHeader id='#scrolling-content'/>
-      <v-sheet
-        id="scrolling-content"
-        class="overflow-y-auto main-sheet"
-        max-height="100vh"
-      >
-        <router-view :key="$route.path" />
-      </v-sheet>
-    </v-card>
+    <TheHeader id='#scrolling-content'/>
+    <v-sheet
+      id="scrolling-content"
+      class="overflow-y-auto"
+      max-height="100vh"
+    >
+      <router-view :key="$route.path" />
+    </v-sheet>
   </v-app>
 </template>
 
 <style lang="scss" scoped>
 body {
-  background-color: black;
-}
-
-.main-sheet {
   background-color: black;
 }
 </style>

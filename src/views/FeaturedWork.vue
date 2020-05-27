@@ -82,8 +82,6 @@
 
 <script>
 export default {
-  name: 'FeaturedWork',
-
   data() {
     return {
       theme_class: "feature-work__container",
@@ -95,6 +93,9 @@ export default {
     this.container = document.querySelector(".feature-work__container")
     this.detectWebGL()
     this.$store.commit("initFlipCard", document.querySelector('#threejs-container'))
+    if (this.loadingProgress >= 100) {
+      this.container.classList.add("loading-completed")
+    }
   },
 
   methods: {
@@ -117,7 +118,7 @@ export default {
 
   watch: {
     loadingProgress(value) {
-      if (value >= 99.9) {
+      if (value >= 100) {
         this.container.classList.add("loading-completed")
       }
     },

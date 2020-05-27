@@ -1,34 +1,36 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import FlipCard from '../assets/js/flipcard.js'
+import FlipCard from "../assets/js/flipcard.js";
 
+Vue.use(Vuex);
 
-Vue.use(Vuex)
-
-
-export default new Vuex.Store({
+//init store
+const store = new Vuex.Store({
   state: {
     flipCard: new FlipCard(),
     //isInteracting: false, // Boolean, keep updating thread if true
   },
   getters: {
     getLoadingProgress(state) {
-      return state.flipCard.getLoadingProgress() * 100
+      return state.flipCard.getLoadingProgress() * 100;
     },
     getClickedProject(state) {
-      return state.flipCard.getURL()
+      return state.flipCard.getURL();
     },
   },
   mutations: {
     initFlipCard(state, container) {
-      state.flipCard.init(container)
-      state.flipCard.animate()
+      state.flipCard.init(container);
+      state.flipCard.animate();
     },
-    resetFlipCard(state) {
-      state.flipCard.setRendering(true)
+    setRenderFlipCard(state, rendering) {
+      state.flipCard.setRendering(rendering);
     },
-    setRendering(state, rendering) {
-      state.flipCard.setRendering(rendering)
+    flipCardTransitionAway(state) {
+      state.flipCard.transitionAway();
+    },
+    flipCardTransitionBack(state) {
+      state.flipCard.transitionBack();
     },
     // addKnot(state, payload) {
     //   const group = payload.group; // Int number
@@ -38,4 +40,6 @@ export default new Vuex.Store({
     // },
   },
   actions: {},
-})
+});
+
+export default store;

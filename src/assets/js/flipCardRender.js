@@ -25,7 +25,8 @@ const CONFIGURATION_ = {
 
 // Drawing functions for FlipCard.
 class FlipCardRender {
-  constructor() {
+  // @param {boolean} autoFlip If auto flipping is on for device.
+  constructor(autoFlip) {
     // Card configurated.
     this.CARD_SIZE = 100;
     this.CARD_COL_NUM = 3;
@@ -36,23 +37,10 @@ class FlipCardRender {
     this.cardLastVisited_ = null;
     this.cards_ = [];
     this.group_ = new THREE.Object3D();
-    this.autoFlip_ = false;
+    this.autoFlip_ = autoFlip;
     this.projectsHeight_ = 0;
     this.projectsWidth_ = 0;
     this.projectColNum_ = 0;
-  }
-
-  setAutoFlip(autoFlip) {
-    this.autoFlip_ = autoFlip;
-  }
-
-  setProjectsSize(width, height) {
-    this.projectsHeight_ = height;
-    this.projectsWidth_ = width;
-  }
-
-  setProjectsColNum(colNum) {
-    this.projectColNum_ = colNum;
   }
 
   /* Check if the class is initialized.
@@ -160,7 +148,16 @@ class FlipCardRender {
   // Use the project theme color for text background and card's side background.
   // parent: object3D Object group.
   // projectConfig: json Project configuration file.
-  initializeProjects(projectsConfig, cardImages) {
+  initializeProjects(
+    projectsConfig,
+    projectsWidth,
+    projectsHeight,
+    projectColNum,
+    cardImages
+  ) {
+    this.projectsWidth_ = projectsWidth;
+    this.projectsHeight_ = projectsHeight;
+    this.projectColNum_ = projectColNum;
     let geometry = new THREE.BoxBufferGeometry(
       this.CARD_SIZE,
       this.CARD_SIZE,
@@ -223,7 +220,10 @@ class FlipCardRender {
     }
   }
 
-  resetProjects() {
+  resetProjects(projectsWidth, projectsHeight, projectColNum) {
+    this.projectsWidth_ = projectsWidth;
+    this.projectsHeight_ = projectsHeight;
+    this.projectColNum_ = projectColNum;
     for (let i = 0; i < this.cards_.length; i++) {
       this.setupCardPos_(this.cards_[i]);
     }
@@ -383,7 +383,7 @@ class FlipCardRender {
   }
 
   transitionBack() {
-    this.transitionBack_();
+    setTimeout(this.transitionBack_.bind(this), 1000);
   }
 
   transitionBack_() {

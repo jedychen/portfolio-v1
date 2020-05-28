@@ -43,7 +43,13 @@ const DEVICE_ = {
 // FlipCard Class for used in main.js.
 class FlipCard {
   constructor() {
-    this.flipCardRender = new FlipCardRender();
+    // Device configurations.
+    this.autoFlip_ = false; // Automatically flip the cards.
+    this.devicePixelRatio_ = 1;
+    this.DEVICE_ = DEVICE_.DESKTOP;
+    this.configDevice_();
+
+    this.flipCardRender = new FlipCardRender(this.autoFlip_);
 
     const cardSize = this.flipCardRender.getCardSize();
     // Standard size for setting up positions of light and other major elements.
@@ -53,7 +59,6 @@ class FlipCard {
     this.PROJECT_HEIGHT = this.flipCardRender.getProjectHeight();
     this.LIGHT_COLOR = 0xffffff;
     this.BACKGROUND_COLOR = 0x000000;
-    this.DEVICE_ = DEVICE_.DESKTOP;
 
     this.isInitialized_ = false;
     this.cameraY_ = 0;
@@ -65,8 +70,7 @@ class FlipCard {
     this.isRendering_ = true; // If the threeJS is rendering.
     this.container_ = null;
     this.aspectRatio_ = 1;
-    this.autoFlip_ = false; // Automatically flip the cards.
-    this.devicePixelRatio_ = 1;
+
     this.projectsConfig_ = {};
     this.projectNum_ = 0;
     this.projectColNum_ = 3;
@@ -92,8 +96,6 @@ class FlipCard {
     }
 
     // Functions below only need to be excuted once.
-
-    this.configDevice_();
 
     // Initialize Three.js configurations.
     this.renderer_ = new THREE.WebGLRenderer({ antialias: true });
@@ -167,7 +169,7 @@ class FlipCard {
   transitionBack() {
     this.isRendering_ = true;
     if (this.projectClicked_) {
-      setTimeout(this.flipCardRender.transitionBack, 2000);
+      this.flipCardRender.transitionBack();
       this.projectClicked_ = false;
     }
   }
@@ -244,11 +246,8 @@ class FlipCard {
     }
 
     loadManager.onLoad = () => {
-      this.setupResponsive_(true);
       this.setupLights_(this.group_);
-      this.group_.position.y =
-        (this.projectColNum_ * this.PROJECT_WIDTH * 0.5) / this.aspectRatio_ -
-        135;
+      this.setupResponsive_(true);
       this.scene_.add(this.group_);
       this.setupRenderer_(this.container_);
       console.log("Assets are all loaded.");
@@ -272,21 +271,19 @@ class FlipCard {
       if (tabletCheck()) {
         this.DEVICE_ = DEVICE_.TABLET;
         this.devicePixelRatio_ = 1;
-        console.log("Tablet device");
+        console.log("Device: Tablet");
       } else {
         this.DEVICE_ = DEVICE_.MOBILE;
         this.devicePixelRatio_ = window.devicePixelRatio;
-        console.log("Mobile device");
+        console.log("Device: Mobile");
       }
     } else {
       // Desktop
       this.autoFlip_ = false;
       this.devicePixelRatio_ = 1;
       this.DEVICE_ = DEVICE_.TABLET;
-      console.log("Desktop device");
+      console.log("Device: Desktop");
     }
-
-    this.flipCardRender.setAutoFlip(this.autoFlip_);
   }
 
   /* Set up responsive behavior.
@@ -312,20 +309,29 @@ class FlipCard {
     this.camera_.position.set(0, this.cameraY_, this.cameraZ_);
     this.camera_.updateProjectionMatrix();
 
-    this.flipCardRender.setProjectsSize(projectsWidth, projectsHeight);
-    this.flipCardRender.setProjectsColNum(this.projectColNum_);
     // Set up the flip cards layout.
     if (this.flipCardRender.isInitialized() == false) {
       this.flipCardRender.initializeProjects(
         this.projectsConfig_,
+        projectsWidth,
+        projectsHeight,
+        this.projectColNum_,
         this.cardImages_
       );
       for (const card of this.flipCardRender.getAllCards()) {
         this.group_.add(card);
       }
     } else {
-      this.flipCardRender.resetProjects();
+      this.flipCardRender.resetProjects(
+        projectsWidth,
+        projectsHeight,
+        this.projectColNum_
+      );
     }
+
+    this.group_.position.y =
+      (this.projectColNum_ * this.PROJECT_WIDTH * 0.5) / this.aspectRatio_ -
+      135;
   }
 
   /* Calculate configurations for responsive behavior.
@@ -481,7 +487,6 @@ class FlipCard {
    * @private
    */
   swipDeviceUp_() {
-    console.log("listen event swipe up");
     let changedPosY = this.camera_.position.y - CONFIGURATION_.swipeSpeed;
     if (changedPosY <= -this.cameraY_ + this.CAMERA_BOTTOM_MARGIN)
       changedPosY = -this.cameraY_ + this.CAMERA_BOTTOM_MARGIN;
@@ -496,7 +501,6 @@ class FlipCard {
    * @private
    */
   swipDeviceDown_() {
-    console.log("listen event swipe down");
     let changedPosY = this.camera_.position.y + CONFIGURATION_.swipeSpeed;
     if (changedPosY >= this.cameraY_) changedPosY = this.cameraY_;
     this.hammerSwipe = gsap.to(this.camera_.position, {
@@ -511,7 +515,6 @@ class FlipCard {
    * @private
    */
   onMouseMove_(event) {
-    console.log("listening to mouse move");
     // calculate mouse position in normalized device coordinates
     // (-1 to +1) for both components
     event.preventDefault();

@@ -15,7 +15,7 @@ import { randomInRange, calcDistance } from "./utils.js";
  *       "weight": string. Font weight like "normal", "border".
  */
 
-// @private
+/** @private */
 const CONFIGURATION_ = {
   fontSize: 22, // Text at the back of cards.
   lineHeight: 40, // Text at the back of cards.
@@ -25,7 +25,10 @@ const CONFIGURATION_ = {
 
 // Drawing functions for FlipCard.
 class FlipCardRender {
-  // @param {boolean} autoFlip If auto flipping is on for device.
+  /**
+   * @param {boolean} autoFlip If auto flipping is on for device.
+   */
+
   constructor(autoFlip) {
     // Card configurated.
     this.CARD_SIZE = 100;
@@ -36,14 +39,14 @@ class FlipCardRender {
     this.isInitialized_ = false;
     this.cardLastVisited_ = null;
     this.cards_ = [];
-    this.group_ = new THREE.Object3D();
     this.autoFlip_ = autoFlip;
     this.projectsHeight_ = 0;
     this.projectsWidth_ = 0;
     this.projectColNum_ = 0;
   }
 
-  /* Check if the class is initialized.
+  /**
+   * Check if the class is initialized.
    * @return {boolean}
    * @public
    */
@@ -51,7 +54,8 @@ class FlipCardRender {
     return this.isInitialized_;
   }
 
-  /* Check if an element is a card.
+  /**
+   * Check if an element is a card.
    * @return {boolean}
    * @public
    */
@@ -60,7 +64,8 @@ class FlipCardRender {
     return false;
   }
 
-  /* Get each card's width/height size.
+  /**
+   * Get each card's width/height size.
    * @return {number}
    * @public
    */
@@ -68,7 +73,9 @@ class FlipCardRender {
     return this.CARD_SIZE;
   }
 
-  /* Get a card's url.
+  /**
+   * Get a card's url.
+   * @param {THREE.Mesh} element Card element.
    * @return {string}
    * @public
    */
@@ -76,7 +83,8 @@ class FlipCardRender {
     return element.url;
   }
 
-  /* Get a project's width value.
+  /**
+   * Get a project's width value.
    * @return {string}
    * @public
    */
@@ -84,7 +92,8 @@ class FlipCardRender {
     return this.SINGLE_PROJECT_WIDTH;
   }
 
-  /* Get a project's height value.
+  /**
+   * Get a project's height value.
    * @return {string}
    * @public
    */
@@ -92,36 +101,27 @@ class FlipCardRender {
     return this.SINGLE_PROJECT_HEIGHT;
   }
 
-  /* Get all projects' height value.
-   * @param {number} projecNum Number of projects.
-   * @return {number}
+  /**
+   * Get all the cards in an array.
+   * @return {Array}
    * @public
    */
-  // getProjectsHeight(projecNum) {
-  //   return Math.ceil(projecNum / this.PROJ_COL_NUM) * this.PROJECT_HEIGHT;
-  // }
-
-  // /* Get all projects' width value.
-  //  * @param {number} projecNum Number of projects.
-  //  * @return {number}
-  //  * @public
-  //  */
-  // getProjectsWidth(projecNum) {
-  //   return projecNum * this.CARD_COL_NUM * this.CARD_SIZE;
-  // }
-
   getAllCards() {
     return this.cards_;
   }
 
-  /* Restart the flipping animation.
+  /**
+   * Restart the flipping animation.
+   * @param {THREE.Mesh} element Card element.
    * @public
    */
   flip(element) {
     element.flip.restart();
   }
 
-  /* Hold the flipping animation.
+  /**
+   * Hold the flipping animation.
+   * @param {THREE.Mesh} element Card element.
    * @public
    */
   holdFlip(element) {
@@ -132,22 +132,15 @@ class FlipCardRender {
 
   // SETUP functions
 
-  /* Set up cards for all the projects.
-   * @param {threejs}
+  /**
+   * Set up all the project cards.
+   * @param {JSON} projectsConfig Json data of projects' configs.
+   * @param {number} projectsWidth Width of all the projects.
+   * @param {number} projectsHeight Height of all the projects.
+   * @param {number} projectColNum Number of colums of projects.
+   * @param {Array} cardImages Array of card image textures.
    * @public
    */
-  // setupProjectsCards(projectsConfig, isInitialzing, coverImages) {
-  //   if (!this.isInitialized_) {
-  //     this.initializeProjects(projectsConfig, coverImages);
-  //   } else {
-  //     this.resetProjects(isInitialzing);
-  //   }
-  // }
-
-  /* -- Set up project cards --*/
-  // Use the project theme color for text background and card's side background.
-  // parent: object3D Object group.
-  // projectConfig: json Project configuration file.
   initializeProjects(
     projectsConfig,
     projectsWidth,
@@ -173,10 +166,30 @@ class FlipCardRender {
     this.isInitialized_ = true;
   }
 
-  /* -- Set up cards for a single project --*/
-  // parent: object3D Object group.
-  // projectConfig: json Single project's configuration file.
-  // geometry: mesh BoxBufferGeometry.
+  /**
+   * Reset all projects cards.
+   * @param {number} projectsWidth Width of all the projects.
+   * @param {number} projectsHeight Height of all the projects.
+   * @param {number} projectColNum Number of colums of projects.
+   * @public
+   */
+  resetProjects(projectsWidth, projectsHeight, projectColNum) {
+    this.projectsWidth_ = projectsWidth;
+    this.projectsHeight_ = projectsHeight;
+    this.projectColNum_ = projectColNum;
+    for (let i = 0; i < this.cards_.length; i++) {
+      this.setupCardPos_(this.cards_[i]);
+    }
+  }
+
+  /**
+   * Set up cards for a single project.
+   * Use the project theme color for text background and card's side background.
+   * @param {JSON} projectConfig Json data of single project's config.
+   * @param {Array} cardImages Array of card image textures.
+   * @param {THREE.BoxBufferGeometry} geometry Card geometry.
+   * @private
+   */
   setupSingleProject_(projectConfig, cardImages, geometry) {
     const projectIndex = projectConfig.position;
     const material = new THREE.MeshBasicMaterial({
@@ -220,15 +233,11 @@ class FlipCardRender {
     }
   }
 
-  resetProjects(projectsWidth, projectsHeight, projectColNum) {
-    this.projectsWidth_ = projectsWidth;
-    this.projectsHeight_ = projectsHeight;
-    this.projectColNum_ = projectColNum;
-    for (let i = 0; i < this.cards_.length; i++) {
-      this.setupCardPos_(this.cards_[i]);
-    }
-  }
-
+  /**
+   * Set up the position of single card.
+   * @param {THREE.Mesh} card Card element.
+   * @private
+   */
   setupCardPos_(card) {
     const projectIndex = card.projectIndex;
     const projectOrigin = this.calcuProjectOriginPos_(projectIndex);
@@ -254,6 +263,11 @@ class FlipCardRender {
     };
   }
 
+  /**
+   * Calculates a project's origin position on canvas.
+   * @param {number} projectIndex Project's index number.
+   * @private
+   */
   calcuProjectOriginPos_(projectIndex) {
     let xOrigin =
       -this.projectsWidth_ * 0.5 +
@@ -268,12 +282,14 @@ class FlipCardRender {
     };
   }
 
-  /* -- Draws text on a canvas --*/
-  // To be used as texture on cards.
-  //  textArray: string Separated with ','.
-  //  color: hex number.
-  //  fontWeight: string 'normal'/'bold'/'lighter'
-  //  horizontalFlip: boolean If the card is flipping horizontally.
+  /**
+   * Render a card's text on a canvas as a texture.
+   * @param {Array} textArray Text array.
+   * @param {string} color Color in hex number.
+   * @param {string} fontWeight Font weight like 'normal'/'bold'/'lighter'.
+   * @param {boolean} horizontalFlip If the card is flipping horizontally.
+   * @private
+   */
   drawTextAsTexture_(textArray, color, fontWeight, horizontalFlip) {
     var canvas = document.createElement("canvas");
     canvas.width = 256;
@@ -308,8 +324,13 @@ class FlipCardRender {
     return texture;
   }
 
-  /* -- Adds flipping animation as GSAP timeline --*/
-  //  card: object3D Project card
+  // Animations
+
+  /**
+   * Add flipping animation as GSAP timeline.
+   * @param {THREE.Mesh} card Card element.
+   * @private
+   */
   addCardFlipAnimation_(card) {
     const duration = 2; // 2 seconds
     let delay = 0;
@@ -327,6 +348,7 @@ class FlipCardRender {
       delay: delay,
     };
 
+    // Flip back when mouse moving away.
     var config_reverse = {
       ease: Elastic.easeOut,
       duration: duration,
@@ -344,8 +366,11 @@ class FlipCardRender {
       .to(card.rotation, config_reverse);
   }
 
-  /* -- Adds fade away transition to all the cards --*/
-  //  cardVisited: object3D Project card, currently clicked card.
+  /**
+   * Add fade away transition to all the cards.
+   * @param {THREE.Mesh} card Card element.
+   * @public
+   */
   transitionAway(cardVisited) {
     this.cardLastVisited_ = cardVisited;
     for (let card of this.cards_) {
@@ -382,10 +407,18 @@ class FlipCardRender {
     }
   }
 
+  /**
+   * Wrapper funcition to set transition animation when visiting back.
+   * @public
+   */
   transitionBack() {
     setTimeout(this.transitionBack_.bind(this), 1000);
   }
 
+  /**
+   * Set transition animation when visiting back.
+   * @public
+   */
   transitionBack_() {
     for (let card of this.cards_) {
       let config_fade = {

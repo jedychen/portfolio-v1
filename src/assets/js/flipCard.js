@@ -5,7 +5,8 @@ import FlipCardRender from "./flipCardRender.js";
 import json from "../project_data.json";
 import { mobileCheck, tabletCheck } from "./utils.js";
 
-/* Window breakpoint configuration.
+/**
+ * Window breakpoint configuration.
  * @private
  */
 const BREAKPOINTS_ = {
@@ -15,7 +16,8 @@ const BREAKPOINTS_ = {
   lg: 1904,
 };
 
-/* Camera's z distance.
+/**
+ * Camera's z distance.
  * @private
  */
 const CAMERA_DISTANCE_ = {
@@ -24,14 +26,16 @@ const CAMERA_DISTANCE_ = {
   triple: 1090, // three cards in a row.
 };
 
-/* General configurations.
+/**
+ * General configurations.
  * @private
  */
 const CONFIGURATION_ = {
   swipeSpeed: 400, // Speed of vertically swipping screen on mobile.
 };
 
-/* Device code name.
+/**
+ * Device code name.
  * @private
  */
 const DEVICE_ = {
@@ -79,7 +83,8 @@ class FlipCard {
 
   // Main public functions
 
-  /* Initialize the class when vue view is entered.
+  /**
+   * Initialize the class when vue view is entered.
    * @param {Element} container Html element of the container.
    * @public
    */
@@ -122,7 +127,8 @@ class FlipCard {
     this.addEventListeners_();
   }
 
-  /* Main function for update.
+  /**
+   * Main function for update.
    * @public
    */
   animate() {
@@ -133,21 +139,24 @@ class FlipCard {
 
   // Public functions
 
-  /* Get current progess of loading assets/images.
+  /**
+   * Get current progess of loading assets/images.
    * @public
    */
   getLoadingProgress() {
     return this.loadingProgress_;
   }
 
-  /* Get current url of the project card visited.
+  /**
+   * Get current url of the project card visited.
    * @public
    */
   getUrl() {
     return this.url_;
   }
 
-  /* Set if the canvas is rendering.
+  /**
+   * Set if the canvas is rendering.
    * @param {boolean} render True if rendering the canvas.
    * @public
    */
@@ -155,7 +164,8 @@ class FlipCard {
     this.isRendering_ = render;
   }
 
-  /* Call when need to transition away to another vue view.
+  /**
+   * Call when need to transition away to another vue view.
    * @public
    */
   transitionAway() {
@@ -163,7 +173,8 @@ class FlipCard {
     this.removeEventListeners_();
   }
 
-  /* Call when need to transition back to this canvas view.
+  /**
+   * Call when need to transition back to this canvas view.
    * @public
    */
   transitionBack() {
@@ -176,7 +187,8 @@ class FlipCard {
 
   // Main functions
 
-  /* Main function for rendering and ray castering.
+  /**
+   * Main function for rendering and ray castering.
    * @private
    */
   render_() {
@@ -215,7 +227,8 @@ class FlipCard {
     this.renderer_.render(this.scene_, this.camera_);
   }
 
-  /* Load cover images for projects.
+  /**
+   * Load cover images for projects.
    * It will set up all the threejs scene after loading the images.
    * @private
    */
@@ -261,7 +274,8 @@ class FlipCard {
 
   // SETUP
 
-  /* Detect device and set up device specific configurations.
+  /**
+   * Detect device and set up device specific configurations.
    * @private
    */
   configDevice_() {
@@ -286,7 +300,8 @@ class FlipCard {
     }
   }
 
-  /* Set up responsive behavior.
+  /**
+   * Set up responsive behavior.
    * @param {boolean} resize If only resizing happening.
    * @private
    */
@@ -334,7 +349,8 @@ class FlipCard {
       135;
   }
 
-  /* Calculate configurations for responsive behavior.
+  /**
+   * Calculate configurations for responsive behavior.
    * @private
    */
   configureResponsive_() {
@@ -367,7 +383,8 @@ class FlipCard {
     }
   }
 
-  /* Set up Three.js lights.
+  /**
+   * Set up Three.js lights.
    * @param {THREE.Object3D} parent Group for adding elements.
    * @private
    */
@@ -379,7 +396,8 @@ class FlipCard {
     parent.add(key_light).add(ambient_light);
   }
 
-  /* Set up render and append it to container.
+  /**
+   * Set up render and append it to container.
    * @param {Element} container Html element of container.
    * @private
    */
@@ -391,7 +409,8 @@ class FlipCard {
 
   // LISTENER
 
-  /* Main function for adding all the listeners.
+  /**
+   * Main function for adding all the listeners.
    * @private
    */
   addEventListeners_() {
@@ -418,7 +437,8 @@ class FlipCard {
     window.addEventListener("resize", this.setupResponsive_.bind(this), false);
   }
 
-  /* Main function for removing all the listeners.
+  /**
+   * Main function for removing all the listeners.
    * @private
    */
   removeEventListeners_() {
@@ -449,7 +469,8 @@ class FlipCard {
     );
   }
 
-  /* Add listener (Hammer.js) for interactions on mobile/tablet.
+  /**
+   * Add listener (Hammer.js) for interactions on mobile/tablet.
    * @private
    */
   addHammerListener_() {
@@ -462,7 +483,8 @@ class FlipCard {
     this.hammertime.on("swipedown", this.swipDeviceDown_.bind(this));
   }
 
-  /* Remove listener (Hammer.js) for interactions on mobile/tablet.
+  /**
+   * Remove listener (Hammer.js) for interactions on mobile/tablet.
    * @private
    */
   removeHammerListener_() {
@@ -470,7 +492,8 @@ class FlipCard {
     this.hammertime.off("swipedown", this.swipDeviceDown_.bind(this));
   }
 
-  /* Handler for scrolling device on desktop.
+  /**
+   * Handler for scrolling device on desktop.
    * @param {Event} event JS event.
    * @private
    */
@@ -483,7 +506,8 @@ class FlipCard {
     else this.camera_.position.y = changedPosY;
   }
 
-  /* Handler for swipping device up on mobile.
+  /**
+   * Handler for swipping device up on mobile.
    * @private
    */
   swipDeviceUp_() {
@@ -497,7 +521,8 @@ class FlipCard {
     });
   }
 
-  /* Handler for swipping device down on mobile.
+  /**
+   * Handler for swipping device down on mobile.
    * @private
    */
   swipDeviceDown_() {
@@ -510,7 +535,8 @@ class FlipCard {
     });
   }
 
-  /* Handler for raycaster's mouse update.
+  /**
+   * Handler for raycaster's mouse update.
    * @param {Event} event JS event.
    * @private
    */
@@ -522,7 +548,8 @@ class FlipCard {
     this.mouse_.y = -(event.offsetY / this.container_.clientHeight) * 2 + 1;
   }
 
-  /* Handler for clicking card.
+  /**
+   * Handler for clicking card.
    * @param {Event} event JS event.
    * @private
    */
@@ -546,17 +573,23 @@ class FlipCard {
 
   // Utilities
 
-  // @private
+  /**
+   * @private
+   */
   isMobile_() {
     return this.DEVICE_ == DEVICE_.MOBILE;
   }
 
-  // @private
+  /**
+   * @private
+   */
   isTablet_() {
     return this.DEVICE_ == DEVICE_.TABLET;
   }
 
-  // @private
+  /**
+   * @private
+   */
   isDesktop_() {
     return this.DEVICE_ == DEVICE_.DESKTOP;
   }

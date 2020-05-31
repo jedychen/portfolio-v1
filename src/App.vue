@@ -1,6 +1,6 @@
 <template>
-  <v-app>
-    <TheHeader id='#scrolling-content'/>
+  <v-app class="main-app">
+    <TheHeader id="#scrolling-content" />
     <v-sheet
       id="scrolling-content"
       class="overflow-y-auto"
@@ -11,9 +11,9 @@
   </v-app>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 body {
-  background-color: black;
+  background: black;
 }
 </style>
 
@@ -31,23 +31,6 @@ export default {
     return {
     }
   },
-
-  created () {
-    
-  },
-
-  mounted() {
-    // Run thread.update function every 10ms
-    // this.$store.commit("initThread", ".canvas");
-    // setInterval(this.updateThread, 10);
-    // this.$store.commit("setInteracting", true);
-  },
-
-  methods: {
-    // updateThread() {
-    //   this.$store.commit("updateThread");
-    // }
-  }
 };
 </script>
 

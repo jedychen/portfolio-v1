@@ -156,12 +156,8 @@ class FlipCardRender {
       this.CARD_SIZE,
       CONFIGURATION_.cardThickness
     );
-    for (var i = 0; i < projectsConfig.projects.length; i++) {
-      this.setupSingleProject_(
-        projectsConfig.projects[i],
-        cardImages,
-        geometry
-      );
+    for (let projectConfig of projectsConfig.projects) {
+      this.setupSingleProject_(projectConfig, cardImages, geometry);
     }
     this.isInitialized_ = true;
   }
@@ -177,8 +173,8 @@ class FlipCardRender {
     this.projectsWidth_ = projectsWidth;
     this.projectsHeight_ = projectsHeight;
     this.projectColNum_ = projectColNum;
-    for (let i = 0; i < this.cards_.length; i++) {
-      this.setupCardPos_(this.cards_[i]);
+    for (let card of this.cards_) {
+      this.setupCardPos_(card);
     }
   }
 
@@ -313,8 +309,8 @@ class FlipCardRender {
     var x = (flip * canvas.width) / 2 - 110;
     var y = (flip * canvas.height) / 2 - 70;
     context.fillStyle = "black";
-    for (var i = 0; i < textArray.length; i++) {
-      context.fillText(textArray[i], x, y);
+    for (const text of textArray) {
+      context.fillText(text, x, y);
       y += CONFIGURATION_.lineHeight;
     }
 

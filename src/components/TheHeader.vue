@@ -5,38 +5,44 @@
     dark
     hide-on-scroll
     short
-    v-bind:scroll-target="contentId"
+    :scroll-target="contentId"
   >
-
     <v-avatar>
       <v-img
         src="~@/assets/images/logo.jpg"
         alt="Logo"
-      >
-      </v-img>
+      />
     </v-avatar>
 
     <v-toolbar-title
-        class="header__title"
+      class="header__title hidden-sm-and-down"
     >
-    Jedy Chen
+      Jedy Chen
+    </v-toolbar-title>
+    <v-toolbar-title
+      class="header__title hidden-md-and-up"
+    >
+      Jedy
     </v-toolbar-title>
 
-    <v-spacer></v-spacer>
+    <v-spacer />
 
     <v-toolbar-items>
       <v-btn icon>
-        <router-link to="/">Work</router-link>
+        <router-link to="/">
+          Work
+        </router-link>
       </v-btn>
       <v-divider
         class="mx-4"
         vertical
-      ></v-divider>
+      />
       <v-btn icon>
-        <router-link to="/about">About</router-link>
+        <router-link to="/about">
+          About
+        </router-link>
       </v-btn>
     </v-toolbar-items>
-
   </v-app-bar>
 </template>
 
@@ -55,7 +61,10 @@
 export default {
   name: 'TheHeader',
   props: {
-    id: String
+    id: {
+      default: '',
+      type: String
+    }
   },
 
   data() {

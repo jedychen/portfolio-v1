@@ -8,7 +8,7 @@ Vue.use(Vuex);
 const store = new Vuex.Store({
   state: {
     flipCard: new FlipCard(),
-    //isInteracting: false, // Boolean, keep updating thread if true
+    scrollPresentage: 0.0, // number, Article's page reading presentage.
   },
   getters: {
     getLoadingProgress(state) {
@@ -16,6 +16,11 @@ const store = new Vuex.Store({
     },
     getClickedProject(state) {
       return state.flipCard.getUrl();
+    },
+    getScrollPresentage(state) {
+    // For project page, get the scrolling presentage of the page,
+    // and change reading indicators.
+      return state.scrollPresentage;
     },
   },
   mutations: {
@@ -31,6 +36,9 @@ const store = new Vuex.Store({
     },
     flipCardTransitionBack(state) {
       state.flipCard.transitionBack();
+    },
+    setScrollPresentage(state, presentage) {
+      state.scrollPresentage = presentage;
     },
     // addKnot(state, payload) {
     //   const group = payload.group; // Int number

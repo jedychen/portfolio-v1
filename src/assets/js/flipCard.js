@@ -566,6 +566,7 @@ class FlipCard {
       this.intersectedObject_ = intersects[0].object;
       this.flipCardRender.transitionAway(this.intersectedObject_);
       this.url_ = this.flipCardRender.getUrl(this.intersectedObject_);
+      // TODO (jedy) Set this in router.
       setTimeout(() => this.setRendering(false), 3000);
       this.projectClicked_ = true;
     }

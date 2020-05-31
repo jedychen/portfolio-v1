@@ -1,9 +1,15 @@
 <template>
   <div class="full-page">
-    <h1>Not Found</h1>
+    <h1>
+      Not Found
+    </h1>
     <p>
       Oops we couldn't find that page. Try going
-      <router-link :to="{ name: 'home'}">home</router-link>
+      <router-link
+        :to="{ name: 'home'}"
+      >
+        home
+      </router-link>
     </p>
   </div>
 </template>

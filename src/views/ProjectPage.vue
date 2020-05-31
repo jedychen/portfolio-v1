@@ -3,76 +3,52 @@
     fluid
   >
     <v-row
+      v-scroll:#scrolling-content="onScroll"
       no-gutters
       class="project-page"
-      v-scroll:#scrolling-content="onScroll"
     >
       <!-- Side Nav -->
       <v-col
         cols="1"
-        md="2"
-        class="side-nav-col"
+        lg="2"
+        class="side-nav-col hidden-md hidden-xs"
       >
         <SideNav />
       </v-col>
       <!-- Page Content -->
       <v-col
-        cols="10"
-        md="9"
-        class="page-content-col mt-12"
         v-resize="onResize"
+        cols="12"
+        sm="10"
+        md="12"
+        lg="9"
+        class="page-content-col mt-12"
       >
-        <v-row
-          no-gutters
-          class="content-section"
-        >
-          <v-col
-            cols="6"
-            class="content-block"
-          >
-            <v-card
-              class="pa-6"
-              outlined
-              tile
-            >
-              Column
-            </v-card>
-          </v-col>
-          <v-col
-            cols="6"
-            class="content-block"
-          >
-            <v-card
-              class="pa-6"
-              outlined
-              tile
-            >
-              Column
-            </v-card>
-          </v-col>
-        </v-row>
+        <IntroSection />
+        <ContentSection @ready="calcuPageLength" />
       </v-col>
       <!-- Right Margin -->
       <v-col
         cols="1"
-        class="margin-col"
+        class="margin-col hidden-md hidden-xs"
       />
     </v-row>
   </v-container>
 </template>
 
 <style lang="scss" scoped>
-.content-block {
-  height: 300vh;
-}
 </style>
 
 <script>
+import ContentSection from '@/components/ContentSection';
+import IntroSection from '@/components/IntroSection';
 import SideNav from '@/components/SideNav';
 
 export default {
   components: {
     SideNav,
+    IntroSection,
+    ContentSection,
   },
 
   data () {
@@ -96,9 +72,12 @@ export default {
     onScroll(e) {
       this.scrollTop = e.target.scrollTop;
       let presentage = this.scrollTop / (this.pageLength - window.innerHeight);
-      presentage = presentage > 1 ? 1 : presentage;
+      presentage = this.clamp(presentage, 0, 1);
       this.$store.commit("setScrollPresentage", presentage);
     },
+    clamp(num, min, max) {
+      return num <= min ? min : num >= max ? max : num;
+    }
   },
 };
 </script>

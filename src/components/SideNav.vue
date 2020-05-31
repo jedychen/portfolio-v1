@@ -5,7 +5,7 @@
   >
     <v-row
       no-gutters
-      class="side-nav__list-wrapper hidden-sm-and-down"
+      class="side-nav__list-wrapper hidden-md-and-down"
     >
       <v-col
         cols="7"
@@ -109,21 +109,6 @@ export default {
     }
   },
 
-  mounted() {
-    let nav_list_wrapper = document.querySelector(this.selector.list);
-    let nav_list_col = document.querySelector(this.selector.container);
-    nav_list_wrapper.style.width = nav_list_col.getBoundingClientRect().width + "px";
-    for(let i=0; i<this.item; i++) {
-      let nav_item = document.querySelector(this.selector.itemIdPrefix + i.toString());
-      nav_item.style.position = "absolute";
-      nav_item.style.width = "100%";
-      nav_item.style.top = this.items[i].top + "vh";
-    }
-    this.calcuTotalHeight();
-    this.initData();
-    this.setWaypointPos(0);
-  },
-
   computed: {
     waypointPresentage() {
       return this.$store.getters.getScrollPresentage;
@@ -134,6 +119,21 @@ export default {
     waypointPresentage(value) {
       this.setWaypointPos(value);
     },
+  },
+
+  mounted() {
+    let nav_list_wrapper = document.querySelector(this.selector.list);
+    let nav_list_col = document.querySelector(this.selector.container);
+    nav_list_wrapper.style.width = nav_list_col.getBoundingClientRect().width + "px";
+    for(let i=0; i<this.items.length; i++) {
+      let nav_item = document.querySelector(this.selector.itemIdPrefix + i.toString());
+      nav_item.style.position = "absolute";
+      nav_item.style.width = "100%";
+      nav_item.style.top = this.items[i].top + "vh";
+    }
+    this.calcuTotalHeight();
+    this.initData();
+    this.setWaypointPos(0);
   },
 
   methods: {

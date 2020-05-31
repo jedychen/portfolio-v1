@@ -60,6 +60,7 @@
 <script>
 export default {
   name: 'TheHeader',
+
   props: {
     id: {
       default: '',

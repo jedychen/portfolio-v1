@@ -15,12 +15,12 @@
     </v-avatar>
 
     <v-toolbar-title
-      class="header__title hidden-sm-and-down"
+      class="header__title hidden-xs-only"
     >
       Jedy Chen
     </v-toolbar-title>
     <v-toolbar-title
-      class="header__title hidden-md-and-up"
+      class="header__title hidden-sm-and-up"
     >
       Jedy
     </v-toolbar-title>

@@ -16,17 +16,20 @@
       </p>
     </v-col>
     <ContentBlock
+      :topSpace="false"
+      @ready="childReady"
+    />
+    <ContentBlockEmpty />
+    <ContentBlockEmpty />
+    <ContentBlock
       @ready="childReady"
     />
     <ContentBlock
-      v-bind:topSpace="true"
       @ready="childReady"
     />
+    <ContentBlockEmpty />
+    <ContentBlockEmpty />
     <ContentBlock
-      @ready="childReady"
-    />
-    <ContentBlock
-      v-bind:topSpace="true"
       @ready="childReady"
     />
   </v-row>
@@ -37,12 +40,14 @@
 
 <script>
 import ContentBlock from '@/components/ContentBlock';
+import ContentBlockEmpty from '@/components/ContentBlockEmpty';
 
 export default {
   name: 'ContentSection',
 
   components: {
     ContentBlock,
+    ContentBlockEmpty,
   },
 
   data () {

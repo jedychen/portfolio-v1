@@ -1,6 +1,7 @@
 <template>
   <v-container
     fluid
+    class="project-page__container"
   >
     <v-row
       v-scroll:#scrolling-content="onScroll"
@@ -37,9 +38,14 @@
 </template>
 
 <style lang="scss" scoped>
+.project-page__container,
+.project-page {
+  background: black;
+}
 </style>
 
 <script>
+import debounce from 'lodash/debounce'
 import ContentSection from '@/components/ContentSection';
 import IntroSection from '@/components/IntroSection';
 import SideNav from '@/components/SideNav';
@@ -66,9 +72,9 @@ export default {
     calcuPageLength() {
       this.pageLength = document.querySelector(".page-content-col").offsetHeight;
     },
-    onResize() {
+    onResize: debounce(function(){
       this.calcuPageLength();
-    },
+    }, 100),
     onScroll(e) {
       this.scrollTop = e.target.scrollTop;
       let presentage = this.scrollTop / (this.pageLength - window.innerHeight);

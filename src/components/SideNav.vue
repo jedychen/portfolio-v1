@@ -26,7 +26,7 @@
             >
               <v-list-item-content>
                 <v-list-item-title
-                  class="subtitle-2"
+                  class="side-nav__list-item-text subtitle-2"
                 >
                   {{ list_item.title }}
                 </v-list-item-title>
@@ -58,6 +58,24 @@
   height: 100vh;
 }
 
+.side-nav__list {
+  background: black;
+}
+
+.side-nav__list-item {
+  .side-nav__list-item-text {
+    font-weight: 300;
+    color: grey;
+  }
+
+  &.side-nav__list-item-active {
+    .side-nav__list-item-text {
+      font-weight: 500;
+      color: white;
+    }
+  }
+}
+
 .side-bar__waypoint {
   height: 25px;
   position: absolute;
@@ -66,6 +84,8 @@
 </style>
 
 <script>
+import debounce from 'lodash/debounce'
+
 export default {
   name: 'SideNav',
 
@@ -118,6 +138,7 @@ export default {
   watch: {
     waypointPresentage(value) {
       this.setWaypointPos(value);
+      this.setActiveLink();
     },
   },
 
@@ -127,6 +148,8 @@ export default {
     nav_list_wrapper.style.width = nav_list_col.getBoundingClientRect().width + "px";
     for(let i=0; i<this.items.length; i++) {
       let nav_item = document.querySelector(this.selector.itemIdPrefix + i.toString());
+      if (i==0) 
+        nav_item.classList.add("side-nav__list-item-active");
       nav_item.style.position = "absolute";
       nav_item.style.width = "100%";
       nav_item.style.top = this.items[i].top + "vh";
@@ -150,13 +173,27 @@ export default {
           this.waypointHeight;
       waypointElem.style.top = (top).toString() + 'px';
     },
+    setActiveLink() {
+      let waypointElem = document.querySelector(this.selector.waypoint);
+      const waypoint_offset = waypointElem.getBoundingClientRect().top;
+      let num = 0;
+      for(let i=0; i<this.items.length; i++) {
+        let nav_item = document.querySelector(this.selector.itemIdPrefix + i.toString());
+        let current_nav_item_offset = nav_item.getBoundingClientRect().top;
+        if (current_nav_item_offset < waypoint_offset)
+          num = i;
+        nav_item.classList.remove("side-nav__list-item-active");
+      }
+      let nav_item = document.querySelector(this.selector.itemIdPrefix + (num).toString());
+      nav_item.classList.add("side-nav__list-item-active");
+    },
     calcuTotalHeight() {
       this.totalHeight = document.querySelector(
           this.selector.list).getBoundingClientRect().height;
     },
-    onResize() {
+    onResize: debounce(function(){
       this.calcuTotalHeight();
-    }
+    }, 100)
   },
 };
 </script>

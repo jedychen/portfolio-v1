@@ -8,11 +8,11 @@
       md="6"
       class="content-block pa-6"
     >
-      <h1 class="display-2 ma-1 mb-4">
-        {{ title }}
+      <h1 class="mb-4 intro-section__title">
+        {{ content.title }}
       </h1>
       <v-chip
-        v-for="(tag, i) in tags"
+        v-for="(tag, i) in content.tags"
         :key="i"
         label
         
@@ -21,8 +21,8 @@
       >
         {{ tag }}
       </v-chip>
-      <p class="title font-weight-light ma-1 mt-8">
-        {{ date }}
+      <p class="title font-weight-light mt-8">
+        {{ content.date }}
       </p>
     </v-col>
     <v-col
@@ -30,9 +30,9 @@
       md="6"
       class="content-block pa-6"
     >
-      <InlineVideo :id="introVideoId" />
-      <p class="ma-1 mt-6">
-        {{ introDescription }}
+      <InlineVideo :id="content.videoId" />
+      <p class="mt-6">
+        {{ content.description }}
       </p>
     </v-col>
     <v-col
@@ -45,6 +45,11 @@
 </template>
 
 <style lang="scss" scoped>
+.intro-section__title {
+  font-family: 'Mayeka-Regular', sans-serif;
+  font-size: 60px;
+  font-weight: 400;
+}
 </style>
 
 <script>
@@ -52,24 +57,20 @@ import InlineVideo from '@/components/InlineVideo';
 
 export default {
   name: 'IntroSection',
+
   components: {
     InlineVideo,
   },
+
+  props: {
+    content: {
+      default: null,
+      type: Object
+    },
+  },
+
   data () {
-    return {
-      tags: [
-        "Game Design",
-        "Physical Computing",
-        "Processing",
-        "Arduino",
-        "Laser Cut",
-        "Sensor",
-      ],
-      title: "Equilibrium",
-      date: "2016",
-      introVideoId: 393465949,
-      introDescription: "Equilibrium is a collaborative digital game, designed and developed for the physical computing program held at ITP, Tisch School of the Arts in New York University. It is a digital game that combines emotive interactions, game mechanics, industrial design and a refined aesthetic culminating in hardware and software.",
-    }
+    return {}
   },
 }
 </script>

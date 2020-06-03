@@ -3,35 +3,34 @@
     no-gutters
     class="content-section"
   >
-    <!-- Section Intro -->
+    <!-- Render section's title and intro. -->
     <v-col
       cols="12"
       class="content-block pa-6"
     >
-      <h1 class="display-1 ma-1 mb-4">
-        {{ sectionTitle }}
+      <h1 class="display-1 mb-4">
+        {{ content.title }}
       </h1>
-      <p class="ma-1 mt-6">
-        {{ sectionDescription }}
+      <p class="mt-6">
+        {{ content.description }}
       </p>
     </v-col>
-    <ContentBlock
-      :topSpace="false"
-      @ready="childReady"
-    />
-    <ContentBlockEmpty />
-    <ContentBlockEmpty />
-    <ContentBlock
-      @ready="childReady"
-    />
-    <ContentBlock
-      @ready="childReady"
-    />
-    <ContentBlockEmpty />
-    <ContentBlockEmpty />
-    <ContentBlock
-      @ready="childReady"
-    />
+    <!-- Render content blocks. -->
+    <template
+      v-for="data in content.contentBlock"
+    >
+      <template v-if="data.topMargin">
+        <!-- Add empty blocks to alternate this block's position from the last one. -->
+        <ContentBlockEmpty :key="data.summary" />
+        <ContentBlockEmpty :key="data.summary" />
+      </template>
+      <ContentBlock
+        :content="data"
+        :topMargin="data.topMargin"
+        :key="data.summary"
+        @ready="childReady"
+      />
+    </template>
   </v-row>
 </template>
 
@@ -50,12 +49,15 @@ export default {
     ContentBlockEmpty,
   },
 
+  props: {
+    content: {
+      default: null,
+      type: Object
+    },
+  },
+
   data () {
-    return {
-      sectionTitle: "Background",
-      sectionDescription: "To transform a deep conceptual idea into a digital game experience.",
-      content: "Equilibrium is a collaborative digital game, designed and developed for the physical computing program held at ITP, Tisch School of the Arts in New York University. It is a digital game that combines emotive interactions, game mechanics, industrial design and a refined aesthetic culminating in hardware and software.",
-    }
+    return {}
   },
   methods: {
     childReady() {

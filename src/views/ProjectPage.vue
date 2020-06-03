@@ -25,8 +25,13 @@
         lg="9"
         class="page-content-col mt-12"
       >
-        <IntroSection />
-        <ContentSection @ready="calcuPageLength" />
+        <IntroSection :content="introSectionData" />
+        <ContentSection
+          v-for="data in contentSectionData"
+          :key="data.title"
+          :content="data"
+          @ready="calcuPageLength"
+        />
       </v-col>
       <!-- Right Margin -->
       <v-col
@@ -49,6 +54,9 @@ import debounce from 'lodash/debounce'
 import ContentSection from '@/components/ContentSection';
 import IntroSection from '@/components/IntroSection';
 import SideNav from '@/components/SideNav';
+import json from '@/assets/contentful.json'
+import resolveResponse from 'contentful-resolve-response';
+import * as prettify from 'pretty-contentful';
 
 export default {
   components: {
@@ -61,7 +69,13 @@ export default {
     return {
       pageLength: 0, // Page's total length.
       scrollTop: 0, // Scrolling distance to top.
+      introSectionData: {},
+      contentSectionData: [],
     }
+  },
+
+  beforeMount() {
+    this.parseContentful(json);
   },
 
   mounted() {
@@ -70,7 +84,9 @@ export default {
 
   methods: {
     calcuPageLength() {
-      this.pageLength = document.querySelector(".page-content-col").offsetHeight;
+      const contentCol = document.querySelector(".page-content-col");
+      if (contentCol != null)
+        this.pageLength = contentCol.offsetHeight;
     },
     onResize: debounce(function(){
       this.calcuPageLength();
@@ -83,7 +99,19 @@ export default {
     },
     clamp(num, min, max) {
       return num <= min ? min : num >= max ? max : num;
-    }
+    },
+    parseContentful() {
+      const resolvedData = resolveResponse(json);
+      const flattenedData = prettify(resolvedData)
+      // Divide the contentful response by data type
+      for (let item of flattenedData) {
+        if(item.contentType == "projectPage" ) {
+          this.introSectionData = item.introSection;
+          this.contentSectionData = item.contentSection;
+          break;
+        }
+      }
+    },
   },
 };
 </script>

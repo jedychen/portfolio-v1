@@ -21,13 +21,13 @@
     >
       <template v-if="data.topMargin">
         <!-- Add empty blocks to alternate this block's position from the last one. -->
-        <ContentBlockEmpty :key="data.summary" />
-        <ContentBlockEmpty :key="data.summary" />
+        <ContentBlockEmpty :key="data.summary + ' empty block 1'" />
+        <ContentBlockEmpty :key="data.summary + ' empty block 2'" />
       </template>
       <ContentBlock
+        :key="data.summary + ' block'"
         :content="data"
-        :topMargin="data.topMargin"
-        :key="data.summary"
+        :top-margin="data.topMargin"
         @ready="childReady"
       />
     </template>

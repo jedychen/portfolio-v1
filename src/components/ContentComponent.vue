@@ -9,25 +9,26 @@
     :content="parsedImage"
     @ready="childReady"
   />
-  <div v-else />
-  <!-- <InlineVideo
-    :id="introVideoId"
+  <InlineVideo
+    v-else-if="type == 'inlineVideo'"
+    :content="parsedVideo"
     @ready="childReady"
-  /> -->
+  />
+  <div v-else />
 </template>
 
 <script>
 import debounce from 'lodash/debounce'
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
 import InlineImage from '@/components/InlineImage';
-// import InlineVideo from '@/components/InlineVideo';
+import InlineVideo from '@/components/InlineVideo';
 
 export default {
   name: 'ContentComponent',
 
   components: {
     InlineImage,
-    // InlineVideo,
+    InlineVideo,
   },
 
   props: {
@@ -42,6 +43,7 @@ export default {
       type: '',
       parsedHtml: '',
       parsedImage: null,
+      parsedVideo: null,
     }
   },
 
@@ -51,11 +53,14 @@ export default {
 
   mounted() {
     console.log(this.content)
-    this.type = this.content.contentType
+    this.type = this.content.contentType;
     if (this.type == "text") {
-      this.parsedHtml = documentToHtmlString(this.content.content);
+      this.parsedHtml = documentToHtmlString(this.content.htmlContent);
     } else if (this.type == "inlineImage") {
-      this.parsedImage = this.content.image
+      this.parsedImage = this.content.image;
+    } else if (this.type == "inlineVideo") {
+      this.parsedVideo = this.content;
+      console.log("video", this.parsedVideo)
     }
   },
 

@@ -1,14 +1,15 @@
 <template>
   <div>
     <vimeo-player
+      v-if="content != null"
       ref="player"
       :options="{ responsive: true }"
-      :video-id="videoID"
-      :autoplay="false"
+      :video-id="content.videoId"
+      :autoplay="content.autoPlay"
       :player-height="1080"
       :player-width="1920"
-      loop="0"
-      class="vimeo"
+      :loop="loop"
+      class="vimeo mb-8"
       @ready="onReady"
     />
   </div>
@@ -19,16 +20,24 @@ export default {
   name: "InlineVideo",
 
   props: {
-    id: {
-      default: 393465949,
-      type: Number
+    content: {
+      default: null,
+      type: Object
     }
   },
 
   data() {
-    return {
-      videoID: this.id,
-    }
+    return {}
+  },
+
+  computed: {
+    loop() {
+      if (this.content != null) {
+        if (this.content.autoPlay == true)
+          return '1';
+      }
+      return '0';
+    },
   },
 
   methods: {

@@ -30,7 +30,7 @@
       md="6"
       class="content-block pa-6"
     >
-      <InlineVideo :id="content.videoId" />
+      <InlineVideo :content="content.media" />
       <p class="mt-6">
         {{ content.description }}
       </p>

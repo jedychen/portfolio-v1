@@ -17,17 +17,19 @@
     </v-col>
     <!-- Render content blocks. -->
     <template
-      v-for="data in content.contentBlock"
+      v-for="(data, index) in content.contentBlock"
     >
-      <template v-if="data.topMargin">
+      <template v-if="data.alternateColumn && data.fullWidth == false">
         <!-- Add empty blocks to alternate this block's position from the last one. -->
         <ContentBlockEmpty :key="data.summary + ' empty block 1'" />
-        <ContentBlockEmpty :key="data.summary + ' empty block 2'" />
+        <template v-if="content.contentBlock[index - 1].fullWidth == false">
+          <ContentBlockEmpty :key="data.summary + ' empty block 2'" />
+        </template>
       </template>
       <ContentBlock
         :key="data.summary + ' block'"
         :content="data"
-        :top-margin="data.topMargin"
+        :top-margin="data.alternateColumn && content.contentBlock[index - 1].fullWidth == false"
         @ready="childReady"
       />
     </template>
@@ -59,10 +61,11 @@ export default {
   data () {
     return {}
   },
+
   methods: {
     childReady() {
       this.$emit("ready");
     }
-  }
+  },
 }
 </script>

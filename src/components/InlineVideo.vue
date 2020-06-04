@@ -30,13 +30,6 @@ export default {
     return {}
   },
 
-  mounted() {
-    // if (this.content.muted == true)
-    //   this.$refs["player"].mute();
-    // if (this.content.autoPlay == true)
-    //   this.$refs["player"].play();
-  },
-
   computed: {
     loop() {
       if (this.content != null) {

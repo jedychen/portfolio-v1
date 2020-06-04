@@ -3,7 +3,7 @@
   <v-col
     v-resize="onResize"
     cols="12"
-    md="6"
+    :md="width"
     class="content-block pa-6"
   >
     <ContentComponent
@@ -40,6 +40,14 @@ export default {
   data () {
     return {
       breakpointMd: 960,
+    }
+  },
+
+  computed: {
+    width() {
+      if (this.content.fullWidth == true)
+        return 12;
+      return 6;
     }
   },
 

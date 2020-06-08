@@ -17,19 +17,24 @@
     </v-col>
     <!-- Render content blocks. -->
     <template
-      v-for="(data, index) in content.contentBlock"
+      v-for="(block, index) in content.contentBlocks"
     >
-      <template v-if="data.alternateColumn && data.fullWidth == false">
-        <!-- Add empty blocks to alternate this block's position from the last one. -->
-        <ContentBlockEmpty :key="data.summary + ' empty block 1'" />
-        <template v-if="content.contentBlock[index - 1].fullWidth == false">
-          <ContentBlockEmpty :key="data.summary + ' empty block 2'" />
+      <template v-if="block.alternateColumn && block.fullWidth == false">
+        <!-- 1. When the previous block is half width -->
+        <!-- Add two empty blocks to alternate this block's column, -->
+        <!-- and make this block have negative top margin. -->
+        <!-- 2. When the previous block is full width -->
+        <!-- Add one empty blocks to alternate this block's column -->
+        <!-- and no need to add negative top margin. -->
+        <ContentBlockEmpty :key="block.summary + ' empty block 1'" />
+        <template v-if="content.contentBlocks[index - 1].fullWidth == false">
+          <ContentBlockEmpty :key="block.summary + ' empty block 2'" />
         </template>
       </template>
       <ContentBlock
-        :key="data.summary + ' block'"
-        :content="data"
-        :top-margin="data.alternateColumn && content.contentBlock[index - 1].fullWidth == false"
+        :key="block.summary + ' block'"
+        :content="block"
+        :top-margin="block.alternateColumn && content.contentBlocks[index - 1].fullWidth == false"
         @ready="childReady"
       />
     </template>

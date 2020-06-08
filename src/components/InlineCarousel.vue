@@ -1,50 +1,54 @@
 <template>
-  <v-carousel
-    cycle
-    height="400"
-    hide-delimiter-background
-    show-arrows-on-hover
-  >
-    <v-carousel-item
-      v-for="(slide, i) in slides"
-      :key="i"
+  <div>
+    <v-carousel
+      v-model="currentIndex"
+      cycle
+      hide-delimiter-background
+      hide-delimiters
+      @ready="onReady"
     >
-      <v-sheet
-        :color="colors[i]"
-        height="100%"
-      >
-        <v-row
-          class="fill-height"
-          align="center"
-          justify="center"
-        >
-          <div class="display-3">{{ slide }} Slide</div>
-        </v-row>
-      </v-sheet>
-    </v-carousel-item>
-  </v-carousel>
+      <v-carousel-item
+        v-for="(slide, i) in content.slides"
+        :key="i"
+        :src="slide.file.url"
+      />
+    </v-carousel>
+    <p class="caption mt-2 mb-0 font-weight-bold">
+      Slide {{ currentIndex + 1 }} / {{ content.slides.length }}
+    </p>
+    <p class="caption">
+      {{ currentDescription }}
+    </p>
+  </div>
 </template>
 
 <script>
   export default {
     name: "InlineCarousel",
-    data () {
-      return {
-        colors: [
-          'indigo',
-          'warning',
-          'pink darken-2',
-          'red lighten-1',
-          'deep-purple accent-4',
-        ],
-        slides: [
-          'First',
-          'Second',
-          'Third',
-          'Fourth',
-          'Fifth',
-        ],
+
+    props: {
+      content: {
+        default: null,
+        type: Object
       }
     },
+
+    data () {
+      return {
+        currentIndex: 0,
+      }
+    },
+
+    computed: {
+      currentDescription() {
+        return this.content.slides[this.currentIndex].description
+      }
+    },
+
+    methods: {
+      onReady() {
+        this.$emit("ready");
+      }
+    }
   }
 </script>

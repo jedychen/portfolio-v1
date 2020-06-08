@@ -14,12 +14,18 @@
     :content="parsedVideo"
     @ready="childReady"
   />
+  <InlineCarousel
+    v-else-if="type == 'inlineCarousel'"
+    :content="parsedSlides"
+    @ready="childReady"
+  />
   <div v-else />
 </template>
 
 <script>
 import debounce from 'lodash/debounce'
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+import InlineCarousel from '@/components/InlineCarousel';
 import InlineImage from '@/components/InlineImage';
 import InlineVideo from '@/components/InlineVideo';
 
@@ -27,6 +33,7 @@ export default {
   name: 'ContentComponent',
 
   components: {
+    InlineCarousel,
     InlineImage,
     InlineVideo,
   },
@@ -44,6 +51,7 @@ export default {
       parsedHtml: '',
       parsedImage: null,
       parsedVideo: null,
+      parsedSlides: null,
     }
   },
 
@@ -52,7 +60,7 @@ export default {
   },
 
   mounted() {
-    console.log(this.content)
+    console.log("component", this.content.contentType, this.content)
     this.type = this.content.contentType;
     if (this.type == "text") {
       this.parsedHtml = documentToHtmlString(this.content.htmlContent);
@@ -60,7 +68,8 @@ export default {
       this.parsedImage = this.content.image;
     } else if (this.type == "inlineVideo") {
       this.parsedVideo = this.content;
-      console.log("video", this.parsedVideo)
+    } else if (this.type == "inlineCarousel") {
+      this.parsedSlides = this.content;
     }
   },
 

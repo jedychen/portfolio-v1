@@ -7,9 +7,9 @@
     class="content-block pa-6"
   >
     <ContentComponent
-      v-for="(data, i) in content.content"
+      v-for="(item, i) in content.inlineItems"
       :key="i"
-      :content="data"
+      :content="item"
       @ready="childReady"
     />
   </v-col>

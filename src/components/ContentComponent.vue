@@ -14,6 +14,11 @@
     :content="parsedVideo"
     @ready="childReady"
   />
+  <InlineCard
+    v-else-if="type == 'inlineCard'"
+    :content="parsedCard"
+    @ready="childReady"
+  />
   <InlineCarousel
     v-else-if="type == 'inlineCarousel'"
     :content="parsedSlides"
@@ -25,6 +30,7 @@
 <script>
 import debounce from 'lodash/debounce'
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+import InlineCard from '@/components/InlineCard';
 import InlineCarousel from '@/components/InlineCarousel';
 import InlineImage from '@/components/InlineImage';
 import InlineVideo from '@/components/InlineVideo';
@@ -33,6 +39,7 @@ export default {
   name: 'ContentComponent',
 
   components: {
+    InlineCard,
     InlineCarousel,
     InlineImage,
     InlineVideo,
@@ -52,6 +59,7 @@ export default {
       parsedImage: null,
       parsedVideo: null,
       parsedSlides: null,
+      parsedCard: null,
     }
   },
 
@@ -70,6 +78,8 @@ export default {
       this.parsedVideo = this.content;
     } else if (this.type == "inlineCarousel") {
       this.parsedSlides = this.content;
+    } else if (this.type == "inlineCard") {
+      this.parsedCard = this.content;
     }
   },
 

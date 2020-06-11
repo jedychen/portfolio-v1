@@ -13,12 +13,29 @@
         :src="slide.file.url"
       />
     </v-carousel>
-    <p class="caption mt-2 mb-0 font-weight-bold">
-      Slide {{ currentIndex + 1 }} / {{ content.slides.length }}
-    </p>
-    <p class="caption">
-      {{ currentDescription }}
-    </p>
+
+    <v-row
+      class="mt-2"
+    >
+      <v-col
+        cols="12"
+        sm="2"
+        class="pb-0"
+      >
+        <p class="caption mb-0 font-weight-bold">
+          {{ currentIndex + 1 }} / {{ content.slides.length }}
+        </p>
+      </v-col>
+      <v-col
+        cols="12"
+        sm="10"
+        class="pb-0"
+      >
+        <p class="caption">
+          {{ currentDescription }}
+        </p>
+      </v-col>
+    </v-row>
   </div>
 </template>
 

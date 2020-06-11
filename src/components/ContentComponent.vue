@@ -46,7 +46,7 @@ export default {
   },
 
   props: {
-    content: {
+    component: {
       default: null,
       type: Object
     },
@@ -68,18 +68,18 @@ export default {
   },
 
   mounted() {
-    console.log("component", this.content.contentType, this.content)
-    this.type = this.content.contentType;
+    console.log("component", this.component.contentType, this.component)
+    this.type = this.component.contentType;
     if (this.type == "text") {
-      this.parsedHtml = documentToHtmlString(this.content.htmlContent);
+      this.parsedHtml = documentToHtmlString(this.component.htmlContent);
     } else if (this.type == "inlineImage") {
-      this.parsedImage = this.content.image;
+      this.parsedImage = this.component;
     } else if (this.type == "inlineVideo") {
-      this.parsedVideo = this.content;
+      this.parsedVideo = this.component;
     } else if (this.type == "inlineCarousel") {
-      this.parsedSlides = this.content;
+      this.parsedSlides = this.component;
     } else if (this.type == "inlineCard") {
-      this.parsedCard = this.content;
+      this.parsedCard = this.component;
     }
   },
 

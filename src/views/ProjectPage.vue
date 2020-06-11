@@ -14,7 +14,9 @@
         lg="2"
         class="side-nav-col hidden-md hidden-xs"
       >
-        <SideNav />
+        <SideNav
+          :sections="contentSectionItems"
+        />
       </v-col>
       <!-- Page Content -->
       <v-col
@@ -29,7 +31,8 @@
         <ContentSection
           v-for="item in contentSectionItems"
           :key="item.title"
-          :content="item"
+          :section="item"
+          class="content-section-container"
           @ready="calcuPageLength"
         />
       </v-col>
@@ -87,6 +90,15 @@ export default {
       const contentCol = document.querySelector(".page-content-col");
       if (contentCol != null)
         this.pageLength = contentCol.offsetHeight;
+      this.calcuWaypoints();
+    },
+    calcuWaypoints() {
+      const sections = document.querySelectorAll(".content-section-container");
+      sections.forEach((item, index) => {
+        let offsetTop = item.offsetTop;
+        let vhPos = Math.floor((offsetTop - 100) * 100 / this.pageLength);
+        this.$store.commit("setWaypoint", {index: index, vhPos: vhPos});
+      });
     },
     onResize: debounce(function(){
       this.calcuPageLength();

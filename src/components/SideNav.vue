@@ -15,11 +15,11 @@
           class="side-nav__list mt-12"
         >
           <v-list-item-group
-            v-model="item"
+            v-model="sectionNumber"
             color="primary"
           >
             <v-list-item
-              v-for="(list_item, i) in items"
+              v-for="(section, i) in sections"
               :id="'side-nav-list-item-'+i"
               :key="i"
               class="side-nav__list-item"
@@ -28,7 +28,7 @@
                 <v-list-item-title
                   class="side-nav__list-item-text subtitle-2"
                 >
-                  {{ list_item.title }}
+                  {{ section.title }}
                 </v-list-item-title>
               </v-list-item-content>
             </v-list-item>
@@ -89,6 +89,13 @@ import debounce from 'lodash/debounce'
 export default {
   name: 'SideNav',
 
+  props: {
+    sections: {
+      default: () => [],
+      type: Array
+    },
+  },
+
   data () {
     return {
       totalHeight: 0, // Side Nav's total height.
@@ -99,39 +106,21 @@ export default {
         itemIdPrefix: '#side-nav-list-item-',
         waypoint: '.side-bar__waypoint',
       },
-      item: 6,
-      items: [
-        {
-          title: 'Overview',
-          top: '0',
-        },
-        {
-          title: 'Background',
-          top: '20',
-        },
-        {
-          title: 'Concept',
-          top: '40',
-        },
-        {
-          title: 'Prototyping',
-          top: '50',
-        },
-        {
-          title: 'Production',
-          top: '70',
-        },
-        {
-          title: 'Result',
-          top: '80',
-        },
-      ],
     }
   },
 
   computed: {
     waypointPresentage() {
       return this.$store.getters.getScrollPresentage;
+    },
+    sectionNumber() {
+      return this.sections.length
+    },
+    waypointPosList() {
+      return this.$store.getters.getWaypointPosList;
+    },
+    waypointPosListUpdated() {
+      return this.$store.getters.getWaypointPosListUpdated;
     },
   },
 
@@ -140,20 +129,16 @@ export default {
       this.setWaypointPos(value);
       this.setActiveLink();
     },
+    waypointPosListUpdated(value) {
+      this.setWaypointSectionStyle(false);
+    },
   },
 
   mounted() {
     let nav_list_wrapper = document.querySelector(this.selector.list);
     let nav_list_col = document.querySelector(this.selector.container);
     nav_list_wrapper.style.width = nav_list_col.getBoundingClientRect().width + "px";
-    for(let i=0; i<this.items.length; i++) {
-      let nav_item = document.querySelector(this.selector.itemIdPrefix + i.toString());
-      if (i==0) 
-        nav_item.classList.add("side-nav__list-item-active");
-      nav_item.style.position = "absolute";
-      nav_item.style.width = "100%";
-      nav_item.style.top = this.items[i].top + "vh";
-    }
+    this.setWaypointSectionStyle(true);
     this.calcuTotalHeight();
     this.initData();
     this.setWaypointPos(0);
@@ -166,6 +151,16 @@ export default {
       this.waypointHeight = document.querySelector(this.selector.waypoint).getBoundingClientRect().height;
       this.waypointOffset = first_item_box.top + first_item_box.height * 0.5 + this.waypointHeight * 0.5;
     },
+    setWaypointSectionStyle(initialize=false) {
+      for(let i=0; i<this.sections.length; i++) {
+        let nav_item = document.querySelector(this.selector.itemIdPrefix + i.toString());
+        if (i==0 && initialize) 
+          nav_item.classList.add("side-nav__list-item-active");
+        nav_item.style.position = "absolute";
+        nav_item.style.width = "100%";
+        nav_item.style.top = this.waypointPosList[i] + "vh";
+      }
+    },
     setWaypointPos(presentage) {
       let waypointElem = document.querySelector(this.selector.waypoint);
       const top = this.waypointOffset + 
@@ -177,7 +172,7 @@ export default {
       let waypointElem = document.querySelector(this.selector.waypoint);
       const waypoint_offset = waypointElem.getBoundingClientRect().top;
       let num = 0;
-      for(let i=0; i<this.items.length; i++) {
+      for(let i=0; i<this.sections.length; i++) {
         let nav_item = document.querySelector(this.selector.itemIdPrefix + i.toString());
         let current_nav_item_offset = nav_item.getBoundingClientRect().top;
         if (current_nav_item_offset < waypoint_offset)
@@ -193,6 +188,7 @@ export default {
     },
     onResize: debounce(function(){
       this.calcuTotalHeight();
+      this.setActiveLink();
     }, 100)
   },
 };

@@ -7,9 +7,9 @@
     class="content-block pa-6"
   >
     <ContentComponent
-      v-for="(item, i) in content.inlineItems"
+      v-for="(item, i) in block.inlineItems"
       :key="i"
-      :content="item"
+      :component="item"
       @ready="childReady"
     />
   </v-col>
@@ -31,7 +31,7 @@ export default {
       default: true,
       type: Boolean
     },
-    content: {
+    block: {
       default: null,
       type: Object
     },
@@ -45,7 +45,7 @@ export default {
 
   computed: {
     width() {
-      if (this.content.fullWidth == true)
+      if (this.block.fullWidth == true)
         return 12;
       return 6;
     }

@@ -3,7 +3,7 @@
     v-slot:default="{ hover }"
   >
     <v-card
-      :color="hover ? 'grey darken-2' : 'grey darken-3'"
+      :color="hover ? 'grey darken-3' : 'grey darken-4'"
       max-width="344"
       to="/work/"
     >

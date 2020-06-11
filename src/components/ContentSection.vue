@@ -8,16 +8,16 @@
       cols="12"
       class="content-block pa-6"
     >
-      <h1 class="display-1 mb-4">
-        {{ content.title }}
+      <h1 class="display-2 mb-4">
+        {{ section.title }}
       </h1>
       <p class="mt-6">
-        {{ content.description }}
+        {{ section.description }}
       </p>
     </v-col>
     <!-- Render content blocks. -->
     <template
-      v-for="(block, index) in content.contentBlocks"
+      v-for="(block, index) in section.contentBlocks"
     >
       <template v-if="block.alternateColumn && block.fullWidth == false">
         <!-- 1. When the previous block is half width -->
@@ -27,14 +27,14 @@
         <!-- Add one empty blocks to alternate this block's column -->
         <!-- and no need to add negative top margin. -->
         <ContentBlockEmpty :key="block.summary + ' empty block 1'" />
-        <template v-if="content.contentBlocks[index - 1].fullWidth == false">
+        <template v-if="section.contentBlocks[index - 1].fullWidth == false">
           <ContentBlockEmpty :key="block.summary + ' empty block 2'" />
         </template>
       </template>
       <ContentBlock
         :key="block.summary + ' block'"
-        :content="block"
-        :top-margin="block.alternateColumn && content.contentBlocks[index - 1].fullWidth == false"
+        :block="block"
+        :top-margin="block.alternateColumn && section.contentBlocks[index - 1].fullWidth == false"
         @ready="childReady"
       />
     </template>
@@ -57,7 +57,7 @@ export default {
   },
 
   props: {
-    content: {
+    section: {
       default: null,
       type: Object
     },

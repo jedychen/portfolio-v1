@@ -1,8 +1,8 @@
 <template>
   <div>
     <v-img
-      :src="content.file.url"
-      :alt="content.title"
+      :src="content.image.file.url"
+      :alt="content.image.title"
       lazy-src="https://picsum.photos/id/11/100/60"
       aspect-ratio="1.7"
       @load="onReady"
@@ -21,7 +21,7 @@
       </template>
     </v-img>
     <p class="caption mt-2">
-      {{ content.description }}
+      {{ content.image.description }}
     </p>
   </div>
 </template>

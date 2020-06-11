@@ -9,6 +9,8 @@ const store = new Vuex.Store({
   state: {
     flipCard: new FlipCard(),
     scrollPresentage: 0.0, // number, Article's page reading presentage.
+    waypointPosList: new Array(100).fill(0), // list of int, Section waypoint's position in vh.
+    waypointUpdatedNumber: 0,
   },
   getters: {
     getLoadingProgress(state) {
@@ -22,6 +24,12 @@ const store = new Vuex.Store({
     // and change reading indicators.
       return state.scrollPresentage;
     },
+    getWaypointPosList(state) {
+      return state.waypointPosList;
+    },
+    getWaypointPosListUpdated(state) {
+      return state.waypointUpdatedNumber;
+    }
   },
   mutations: {
     initFlipCard(state, container) {
@@ -40,12 +48,10 @@ const store = new Vuex.Store({
     setScrollPresentage(state, presentage) {
       state.scrollPresentage = presentage;
     },
-    // addKnot(state, payload) {
-    //   const group = payload.group; // Int number
-    //   const id = payload.id; // String name
-    //   const rect = payload.rect; // Object getBoundingClientRect
-    //   state.thread.addKnot(group, id, rect);
-    // },
+    setWaypoint(state, payload) {
+      state.waypointPosList[payload.index] = payload.vhPos;
+      state.waypointUpdatedNumber += 1;
+    },
   },
   actions: {},
 });

@@ -11,7 +11,7 @@
     "@contentful/rich-text-html-renderer": "^13.4.0",
     "contentful-resolve-response": "^1.1.4",
     "core-js": "^3.6.5",
-    "gsap": "^3.3.0",
+    "gsap": "^3.6.0",
     "hammerjs": "^2.0.8",
     "install": "^0.13.0",
     "lodash": "^4.17.15",

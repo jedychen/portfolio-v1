@@ -16,7 +16,7 @@
     "install": "^0.13.0",
     "lodash": "^4.17.15",
     "mathjs": "^6.6.5",
-    "node-sass": "^4.14.1",
+    "node-sass": "^7.0.0",
     "pretty-contentful": "^1.0.1",
     "three": "^0.116.1",
     "vue": "^2.6.10",
